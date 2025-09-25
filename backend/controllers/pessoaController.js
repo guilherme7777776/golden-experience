@@ -14,32 +14,33 @@ exports.listarPessoas = async (req, res) => {
     
   } catch (error) {
     console.error('Erro ao listar pessoas:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ error: 'Erro interno do servidor1' });
     
   }
 }
 
 exports.criarPessoa = async (req, res) => {
   try {
+    
     const {
       id_pessoa,
       nome_pessoa,
       email_pessoa,
       senha_pessoa,
-      endereco_pessoa = null,
-      telefone_pessoa = null,
+      endereco_pessoa,
+      telefone_pessoa,
       data_nascimento
     } = req.body;
-
+    const idPessoaNum = Number(id_pessoa);
     // Validação básica
-    if (!id_pessoa || !nome_pessoa || !email_pessoa || !senha_pessoa || !endereco_pessoa || !telefone_pessoa || !data_nascimento) {
+    if (!nome_pessoa || !email_pessoa || !senha_pessoa || !data_nascimento) {
       return res.status(400).json({
         error: 'id_pessoa, nome, email e senha são obrigatórios'
       });
     }
 
     // Validação de id_pessoa numérico
-    if (typeof id_pessoa !== 'number' || !Number.isInteger(id_pessoa)) {
+    if (typeof idPessoaNum !== 'number' || !Number.isInteger(idPessoaNum)) {
       return res.status(400).json({ error: 'id_pessoa deve ser um número inteiro válido' });
     }
 
@@ -53,7 +54,7 @@ exports.criarPessoa = async (req, res) => {
 
     const result = await query(
       `INSERT INTO PESSOA (id_pessoa, nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento)
-       VALUES ($1, $2, $3, $4, $5, $6)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [id_pessoa, nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento]
     );
@@ -75,7 +76,7 @@ exports.criarPessoa = async (req, res) => {
       });
     }
 
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ error: 'Erro interno do servidor2' });
   }
 }
 
@@ -101,7 +102,7 @@ exports.obterPessoa = async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Erro ao obter pessoa:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ error: 'Erro interno do servidor3' });
   }
 }
 
@@ -116,6 +117,7 @@ exports.atualizarPessoa = async (req, res) => {
       telefone_pessoa,
       data_nascimento
     } = req.body;
+    
 
     if (isNaN(id_pessoa)) {
       return res.status(400).json({ error: 'id_pessoa deve ser um número válido' });
@@ -154,7 +156,7 @@ exports.atualizarPessoa = async (req, res) => {
     const updateResult = await query(
       `UPDATE PESSOA
        SET nome_pessoa = $1, email_pessoa = $2, senha_pessoa = $3, endereco_pessoa = $4, telefone_pessoa = $5, data_nascimento = $6
-       WHERE id_pessoa = $6 RETURNING *`,
+       WHERE id_pessoa = $7 RETURNING *`,
       [
         updatedFields.nome_pessoa,
         updatedFields.email_pessoa,
@@ -176,7 +178,7 @@ exports.atualizarPessoa = async (req, res) => {
       });
     }
 
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ error: 'Erro interno do servidor4' });
   }
 }
 
@@ -210,7 +212,7 @@ exports.deletarPessoa = async (req, res) => {
       });
     }
 
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ error: 'Erro interno do servidor5' });
   }
 }
 
@@ -235,7 +237,7 @@ exports.obterPessoaPorEmail = async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Erro ao obter pessoa por email:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ error: 'Erro interno do servidor6' });
   }
 }
 
@@ -280,6 +282,6 @@ exports.atualizarSenha = async (req, res) => {
     res.json(updateResult.rows[0]);
   } catch (error) {
     console.error('Erro ao atualizar senha:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ error: 'Erro interno do servidor7' });
   }
 }
