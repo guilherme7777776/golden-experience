@@ -4,43 +4,37 @@ SET search_path TO public;
 -- TABELA PESSOA
 -- ========================
 CREATE TABLE PESSOA (
-    CPF INT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
+    id_pessoa INT PRIMARY KEY,
+    nome_pessoa VARCHAR(100) NOT NULL,
     email_pessoa VARCHAR(70) NOT NULL UNIQUE,
     senha_pessoa VARCHAR(255) NOT NULL, -- suporta hash Bcrypt/Argon2
-    endereco VARCHAR(100),
-    telefone VARCHAR(20)
+    endereco_pessoa VARCHAR(100),
+    telefone_pessoa VARCHAR(20),
+    data_nascimento DATE
 );
 
--- ========================
--- TABELAS ESPECIALIZADAS
--- ========================
 CREATE TABLE CLIENTE (
-    CPF INT PRIMARY KEY,
-    endereco VARCHAR(150),
-    FOREIGN KEY (CPF) REFERENCES PESSOA(CPF) ON DELETE CASCADE
+    id_pessoa INT PRIMARY KEY,
+    FOREIGN KEY (id_pessoa) REFERENCES PESSOA(id_pessoa) ON DELETE CASCADE
 );
 
 CREATE TABLE FUNCIONARIO (
-    CPF INT PRIMARY KEY,
+    id_pessoa INT PRIMARY KEY,
     cargo VARCHAR(50),
-    FOREIGN KEY (CPF) REFERENCES PESSOA(CPF) ON DELETE CASCADE
+    FOREIGN KEY (id_pessoa) REFERENCES PESSOA(id_pessoa) ON DELETE CASCADE
 );
 
 CREATE TABLE GERENTE (
-    CPF INT PRIMARY KEY,
-    FOREIGN KEY (CPF) REFERENCES FUNCIONARIO(CPF) ON DELETE CASCADE
+    id_pessoa INT PRIMARY KEY,
+    FOREIGN KEY (id_pessoa) REFERENCES FUNCIONARIO(id_pessoa) ON DELETE CASCADE
 );
 
--- ========================
--- TABELA PRODUTO + ESPECIALIZAÇÕES
--- ========================
 CREATE TABLE PRODUTO (
     id_produto SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     preco DECIMAL(10,2) NOT NULL CHECK (preco >= 0),
-    fcpf INT,
-    FOREIGN KEY (fcpf) REFERENCES FUNCIONARIO(CPF) ON DELETE SET NULL
+    f_id_pessoa INT,
+    FOREIGN KEY (f_id_pessoa) REFERENCES FUNCIONARIO(id_pessoa) ON DELETE SET NULL
 );
 
 CREATE TABLE CAMISETA (
@@ -61,18 +55,12 @@ CREATE TABLE CD (
     FOREIGN KEY (id_produto) REFERENCES PRODUTO(id_produto) ON DELETE CASCADE
 );
 
--- ========================
--- TABELA CARRINHO
--- ========================
 CREATE TABLE CARRINHO (
     id_carrinho SERIAL PRIMARY KEY,
-    ccpf INT,
-    FOREIGN KEY (ccpf) REFERENCES CLIENTE(CPF) ON DELETE CASCADE
+    c_id_pessoa INT,
+    FOREIGN KEY (c_id_pessoa) REFERENCES CLIENTE(id_pessoa) ON DELETE CASCADE
 );
 
--- ========================
--- TABELA ITEM_CARRINHO (associativa)
--- ========================
 CREATE TABLE ITEM_CARRINHO (
     id_item SERIAL PRIMARY KEY,
     id_carrinho INT,
@@ -82,9 +70,6 @@ CREATE TABLE ITEM_CARRINHO (
     FOREIGN KEY (id_produto) REFERENCES PRODUTO(id_produto) ON DELETE CASCADE
 );
 
--- ========================
--- TABELA PAGAMENTO
--- ========================
 CREATE TABLE PAGAMENTO (
     id_pagamento SERIAL PRIMARY KEY,
     id_carrinho INT UNIQUE,
@@ -95,42 +80,38 @@ CREATE TABLE PAGAMENTO (
 );
 
 -- ========================
--- INSERINDO DADOS
+-- INSERÇÃO DE DADOS
 -- ========================
 
 -- PESSOAS
-INSERT INTO PESSOA (CPF, nome, email_pessoa, senha_pessoa, endereco, telefone) VALUES
-(1, 'João da Silva', 'joao@email.com', 'hash1', 'Rua A, 123', '11999990001'),
-(2, 'Bruno Souza', 'bruno@email.com', 'hash2', 'Rua B, 456', '11999990002'),
-(3, 'Carlos Lima', 'carlos@email.com', 'hash3', 'Rua C, 789', '11999990003'),
-(4, 'Daniela Castro', 'daniela@email.com', 'hash4', 'Rua D, 101', '11999990004'),
-(5, 'Eduardo Alves', 'eduardo@email.com', 'hash5', 'Rua E, 202', '11999990005'),
-(6, 'Fernanda Rocha', 'fernanda@email.com', 'hash6', 'Rua F, 303', '11999990006'),
-(7, 'Gustavo Melo', 'gustavo@email.com', 'hash7', 'Rua G, 404', '11999990007'),
-(8, 'Helena Martins', 'helena@email.com', 'hash8', 'Rua H, 505', '11999990008'),
-(9, 'Igor Ferreira', 'igor@email.com', 'hash9', 'Rua I, 606', '11999990009'),
-(10, 'Juliana Dias', 'juliana@email.com', 'hash10', 'Rua J, 707', '11999990010');
+INSERT INTO PESSOA (id_pessoa, nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento) VALUES
+(1, 'João da Silva', 'joao@email.com', 'hash1', 'Rua A, 123', '11999990001', '1990-01-15'),
+(2, 'Bruno Souza', 'bruno@email.com', 'hash2', 'Rua B, 456', '11999990002', '1988-06-23'),
+(3, 'Carlos Lima', 'carlos@email.com', 'hash3', 'Rua C, 789', '11999990003', '1992-09-12'),
+(4, 'Daniela Castro', 'daniela@email.com', 'hash4', 'Rua D, 101', '11999990004', '1995-04-05'),
+(5, 'Eduardo Alves', 'eduardo@email.com', 'hash5', 'Rua E, 202', '11999990005', '1991-11-20'),
+(6, 'Fernanda Rocha', 'fernanda@email.com', 'hash6', 'Rua F, 303', '11999990006', '1985-02-28'),
+(7, 'Gustavo Melo', 'gustavo@email.com', 'hash7', 'Rua G, 404', '11999990007', '1989-07-17'),
+(8, 'Helena Martins', 'helena@email.com', 'hash8', 'Rua H, 505', '11999990008', '1993-12-01'),
+(9, 'Igor Ferreira', 'igor@email.com', 'hash9', 'Rua I, 606', '11999990009', '1990-10-30'),
+(10, 'Juliana Dias', 'juliana@email.com', 'hash10', 'Rua J, 707', '11999990010', '1994-08-14');
 
 -- CLIENTES
-INSERT INTO CLIENTE (CPF, endereco) VALUES
-(1, 'Rua A, 123'),
-(2, 'Rua B, 456'),
-(3, 'Rua C, 789'),
-(4, 'Rua D, 101'),
-(5, 'Rua E, 202');
+INSERT INTO CLIENTE (id_pessoa) VALUES
+(1), (2), (3), (4), (5);
 
 -- FUNCIONARIOS
-INSERT INTO FUNCIONARIO (CPF, cargo) VALUES
+INSERT INTO FUNCIONARIO (id_pessoa, cargo) VALUES
 (6, 'Funcionário'),
 (7, 'Funcionário'),
 (8, 'Gerente');
 
 -- GERENTE
-INSERT INTO GERENTE (CPF) VALUES
+INSERT INTO GERENTE (id_pessoa) VALUES
 (8);
 
 -- PRODUTOS
-INSERT INTO PRODUTO (id_produto, nome, preco, fcpf) VALUES
+INSERT INTO PRODUTO (id_produto, nome, preco, f_id_pessoa) VALUES
 (1, 'Camiseta Rock', 79.90, 6),
 (2, 'Vinil Metallica - Master of Puppets', 129.90, 7),
 (3, 'CD Angra - Temple of Shadows', 49.90, 6),
@@ -162,7 +143,7 @@ INSERT INTO CD (id_produto, artista) VALUES
 (10, 'Queen');
 
 -- CARRINHOS
-INSERT INTO CARRINHO (id_carrinho, ccpf) VALUES
+INSERT INTO CARRINHO (id_carrinho, c_id_pessoa) VALUES
 (1, 1),
 (2, 2),
 (3, 3);

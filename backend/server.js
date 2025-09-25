@@ -79,11 +79,9 @@ app.use('/menu', menuRoutes);
 const pessoaRoutes = require('./routes/pessoaRoutes');
 app.use('/pessoa', pessoaRoutes);
 
-const avaliadorRoutes = require('./routes/avaliadorRoutes');
-app.use('/avaliador', avaliadorRoutes);
 
-const avaliadoRoutes = require('./routes/avaliadoRoutes');
-app.use('/avaliado', avaliadoRoutes);
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
