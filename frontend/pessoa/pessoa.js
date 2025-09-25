@@ -195,26 +195,32 @@ async function excluirPessoa() {
 console.log()
 async function salvarOperacao() {
     const formData = new FormData(form);
+    
     const pessoa = {
-        id_pessoa: currentPersonId.value,
+        id_pessoa: currentPersonId,
         nome_pessoa: formData.get('nome_pessoa'),
         email_pessoa: formData.get('email_pessoa'),
         senha_pessoa: formData.get('senha_pessoa'),
         endereco_pessoa: formData.get('endereco_pessoa'),
+        telefone_pessoa: formData.get('telefone_pessoa'),
         data_nascimento: formData.get('data_nascimento')
+        
     };
     
-    
+    console.log(pessoa,"AAAAAAAAAAAAAAAAAAAA")
     try {
         let responsePessoa;
 
         if (operacao === 'incluir') {
+            
             responsePessoa = await fetch(`${API_BASE_URL}/pessoa`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(pessoa)
+                
+               
             });
 
         } else if (operacao === 'alterar') {
