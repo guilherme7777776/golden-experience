@@ -9,7 +9,7 @@ exports.abrirCrudPessoa = (req, res) => {
 exports.listarPessoas = async (req, res) => {
   console.log("wiogfhiwhegefiohoerwg");
   try {
-    const result = await query('SELECT * FROM PESSOA ORDER BY id_pessoa');
+    const result = await query('SELECT * FROM CLIENTE ORDER BY id_pessoa');
     res.json(result.rows);
     
   } catch (error) {
@@ -53,11 +53,22 @@ exports.criarPessoa = async (req, res) => {
     }
 
     const result = await query(
-      `INSERT INTO PESSOA (id_pessoa, nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
+      `INSERT INTO PESSOA (
+          id_pessoa, nome_pessoa, email_pessoa, senha_pessoa, 
+          endereco_pessoa, telefone_pessoa, data_nascimento
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *`,
+        
       [id_pessoa, nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento]
     );
+    
+    // Inserir na tabela CLIENTE, usando o mesmo id_pessoa
+    await query(
+      `INSERT INTO CLIENTE (id_pessoa) VALUES ($1)`,
+      [id_pessoa]
+    );
+    
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -91,7 +102,7 @@ exports.obterPessoa = async (req, res) => {
     
 
     const result = await query(
-      'SELECT * FROM PESSOA WHERE id_pessoa = $1',
+      'SELECT * FROM CLIENTE JOIN PESSOA ON CLIENTE.id_pessoa = PESSOA.id_pessoa WHERE CLIENTE.id_pessoa = $1'
       [id_pessoa]
     );
 
@@ -192,7 +203,7 @@ exports.deletarPessoa = async (req, res) => {
 
     // Verifica se a pessoa existe
     const existingPersonResult = await query(
-      'SELECT * FROM PESSOA WHERE id_pessoa = $1',
+      'SELECT * FROM CLIENTE JOIN PESSOA ON CLIENTE.id_pessoa = PESSOA.id_pessoa WHERE CLIENTE.id_pessoa = $1'
       [id_pessoa]
     );
 
@@ -285,3 +296,4 @@ exports.atualizarSenha = async (req, res) => {
     res.status(500).json({ error: 'Erro interno do servidor7' });
   }
 }
+
