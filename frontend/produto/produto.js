@@ -209,3 +209,23 @@ async function selecionarProduto(id) {
   searchId.value = id;
   await buscarProduto();
 }
+
+
+function renderizarTabela(produtos) {
+  produtosTableBody.innerHTML = '';
+  produtos.forEach(prod => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><button class="btn-id" onclick="selecionarProduto(${prod.id_produto})">${prod.id_produto}</button></td>
+      <td>${prod.nome}</td>
+      <td>R$ ${parseFloat(prod.preco).toFixed(2)}</td>
+      <td>${prod.f_id_pessoa || ''}</td>
+    `;
+    produtosTableBody.appendChild(row);
+  });
+}
+
+async function selecionarProduto(id) {
+  searchId.value = id;
+  await buscarProduto();
+}
