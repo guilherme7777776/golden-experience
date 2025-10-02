@@ -116,16 +116,16 @@ INSERT INTO PRODUTO (id_produto, nome, preco, f_id_pessoa) VALUES
 (3, 'CD Angra - Temple of Shadows', 49.90, 6),
 (4, 'Camiseta Jazz', 89.90, 7),
 (5, 'Vinil Beatles - Revolver', 139.90, 8),
-(6, 'CD King Crimson - In the Court of the Crimson King', 49.90, 6),
+(6, 'King Crimson - In the Court of the Crimson King', 249.90, 6),
 (7, 'Vinil Megadeth - Rust in Peace', 149.90, 7),
 (8, 'CD Metallica - Ride the Lightning', 69.90, 6),
 (9, 'Vinil Pink Floyd - Dark Side of the Moon', 159.90, 7),
 (10, 'CD Queen - A Night at the Opera', 59.90, 6);
 
 -- CAMISETAS
-INSERT INTO CAMISETA (id_produto, cor) VALUES
-(1, 'Preta'),
-(4, 'Branca');
+INSERT INTO CAMISETA (id_produto) VALUES
+(1),
+(4);
 
 -- VINIS
 INSERT INTO VINIL (id_produto, artista) VALUES
