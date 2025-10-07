@@ -1,16 +1,5 @@
 SET search_path TO public;
 
--- DROP em ordem de dependência
-DROP TABLE IF EXISTS PAGAMENTO CASCADE;
-DROP TABLE IF EXISTS ITEM_CARRINHO CASCADE;
-DROP TABLE IF EXISTS CARRINHO CASCADE;
-DROP TABLE IF EXISTS CD CASCADE;
-DROP TABLE IF EXISTS VINIL CASCADE;
-DROP TABLE IF EXISTS CAMISETA CASCADE;
-DROP TABLE IF EXISTS PRODUTO CASCADE;
-DROP TABLE IF EXISTS FUNCIONARIO CASCADE;
-DROP TABLE IF EXISTS CLIENTE CASCADE;
-DROP TABLE IF EXISTS PESSOA CASCADE;
 
 -- ========================
 -- TABELA PESSOA
@@ -135,17 +124,17 @@ INSERT INTO FUNCIONARIO (id_pessoa, nome_func, email_func, senha_func, endereco_
 (8, 'Thiago Carvalho', 'thiago.carvalho@email.com', 'senhaThiago505', 'Av. Brasil, 505', '11988887784', '1983-12-03', 'Gerente', 5000.00, 40);
 
 -- PRODUTOS
-INSERT INTO PRODUTO (nome, preco, id_funcionario) VALUES
-('Camiseta Rock', 79.90, 6),
-('Vinil Metallica - Master of Puppets', 129.90, 7),
-('CD Angra - Temple of Shadows', 49.90, 6),
-('Camiseta Jazz', 89.90, 7),
-('Vinil Beatles - Revolver', 139.90, 8),
-('King Crimson - In the Court of the Crimson King', 249.90, 6),
-('Vinil Megadeth - Rust in Peace', 149.90, 7),
-('CD Metallica - Ride the Lightning', 69.90, 6),
-('Vinil Pink Floyd - Dark Side of the Moon', 159.90, 7),
-('CD Queen - A Night at the Opera', 59.90, 6);
+INSERT INTO PRODUTO (id_produto, nome, preco, id_funcionario) VALUES
+(1,'Camiseta Rock', 79.90, 6),
+(2,'Vinil Metallica - Master of Puppets', 129.90, 7),
+(3,'CD Angra - Temple of Shadows', 49.90, 6),
+(4,'Camiseta Jazz', 89.90, 7),
+(5,'Vinil Beatles - Revolver', 139.90, 8),
+(6,'King Crimson - In the Court of the Crimson King', 249.90, 6),
+(7,'Vinil Megadeth - Rust in Peace', 149.90, 7),
+(8,'CD Metallica - Ride the Lightning', 69.90, 6),
+(9,'Vinil Pink Floyd - Dark Side of the Moon', 159.90, 7),
+(10,'CD Queen - A Night at the Opera', 59.90, 6);
 
 -- CAMISETAS
 INSERT INTO CAMISETA (id_produto) VALUES (1),(4);

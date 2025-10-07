@@ -89,7 +89,7 @@ async function buscarProduto() {
 function preencherFormulario(produto) {
   document.getElementById('nome').value = produto.nome;
   document.getElementById('preco').value = produto.preco;
-  document.getElementById('f_id_pessoa').value = produto.f_id_pessoa || '';
+  document.getElementById('id_funcionario').value = produto.id_funcionario || '';
 
   // Aqui é o select do tipo
   const selectTipo = document.getElementById('tipo'); // ou o id que você usa
@@ -133,10 +133,10 @@ async function salvarOperacao() {
     id_produto: searchId.value,
     nome: formData.get('nome'),
     preco: formData.get('preco'),
-    f_id_pessoa: formData.get('f_id_pessoa'),
+    id_funcionario: formData.get('id_funcionario'),
     tipo: formData.get('tipo') // ← novo campo
   };
-
+  console.log(produto)
   try {
     let response = null;
 
@@ -147,13 +147,13 @@ async function salvarOperacao() {
         body: JSON.stringify(produto)
       });
     } else if (operacao === 'alterar') {
-      response = await fetch(`${API_BASE_URL}/produto/${currentProductId}`, {
+      response = await fetch(`${API_BASE_URL}/produto/${produto.id_produto}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(produto)
       });
     } else if (operacao === 'excluir') {
-      response = await fetch(`${API_BASE_URL}/produto/${currentProductId}`, {
+      response = await fetch(`${API_BASE_URL}/produto/${produto.id_produto}`, {
         method: 'DELETE'
       });
     }
@@ -208,7 +208,7 @@ function renderizarTabela(produtos) {
       <td>${prod.nome}</td>
       <td>R$ ${parseFloat(prod.preco).toFixed(2)}</td>
       <td>${prod.tipo || 'S'}</td> 
-      <td>${prod.f_id_pessoa || ''}</td>
+      <td>${prod.id_funcionario || ''}</td>
     `;
     produtosTableBody.appendChild(row);
   });
@@ -229,7 +229,7 @@ function renderizarTabela(produtos) {
       <td>${prod.nome}</td>
       <td>R$ ${parseFloat(prod.preco).toFixed(2)}</td>
       <td>${prod.tipo}</td>
-      <td>${prod.f_id_pessoa || ''}</td>
+      <td>${prod.id_funcionario || ''}</td>
     `;
     produtosTableBody.appendChild(row);
   });
