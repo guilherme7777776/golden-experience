@@ -1,42 +1,69 @@
 SET search_path TO public;
 
+-- DROP em ordem de dependência
+DROP TABLE IF EXISTS PAGAMENTO CASCADE;
+DROP TABLE IF EXISTS ITEM_CARRINHO CASCADE;
+DROP TABLE IF EXISTS CARRINHO CASCADE;
+DROP TABLE IF EXISTS CD CASCADE;
+DROP TABLE IF EXISTS VINIL CASCADE;
+DROP TABLE IF EXISTS CAMISETA CASCADE;
+DROP TABLE IF EXISTS PRODUTO CASCADE;
+DROP TABLE IF EXISTS FUNCIONARIO CASCADE;
+DROP TABLE IF EXISTS CLIENTE CASCADE;
+DROP TABLE IF EXISTS PESSOA CASCADE;
+
 -- ========================
 -- TABELA PESSOA
 -- ========================
 CREATE TABLE PESSOA (
-    id_pessoa INT PRIMARY KEY,
-    nome_pessoa VARCHAR(100) NOT NULL,
-    email_pessoa VARCHAR(70) NOT NULL UNIQUE,
-    senha_pessoa VARCHAR(255) NOT NULL, -- suporta hash Bcrypt/Argon2
-    endereco_pessoa VARCHAR(100),
-    telefone_pessoa VARCHAR(20),
-    data_nascimento DATE
+    id_pessoa SERIAL PRIMARY KEY
 );
 
+-- ========================
+-- TABELA CLIENTE
+-- ========================
 CREATE TABLE CLIENTE (
     id_pessoa INT PRIMARY KEY,
+    nome_cliente VARCHAR(100) NOT NULL,
+    email_cliente VARCHAR(70) NOT NULL UNIQUE,
+    senha_cliente VARCHAR(255) NOT NULL,
+    endereco_cliente VARCHAR(100),
+    telefone_cliente VARCHAR(20),
+    data_nascimento DATE,
     FOREIGN KEY (id_pessoa) REFERENCES PESSOA(id_pessoa) ON DELETE CASCADE
 );
 
+-- ========================
+-- TABELA FUNCIONARIO
+-- ========================
 CREATE TABLE FUNCIONARIO (
     id_pessoa INT PRIMARY KEY,
+    nome_func VARCHAR(100) NOT NULL,
+    email_func VARCHAR(70) NOT NULL UNIQUE,
+    senha_func VARCHAR(255) NOT NULL,
+    endereco_func VARCHAR(100),
+    telefone_func VARCHAR(20),
+    data_nascimento DATE,
     cargo VARCHAR(50),
+    salario DECIMAL(10,2),
+    carga_horaria INT,
     FOREIGN KEY (id_pessoa) REFERENCES PESSOA(id_pessoa) ON DELETE CASCADE
 );
 
-CREATE TABLE GERENTE (
-    id_pessoa INT PRIMARY KEY,
-    FOREIGN KEY (id_pessoa) REFERENCES FUNCIONARIO(id_pessoa) ON DELETE CASCADE
-);
-
+-- ========================
+-- TABELA PRODUTO
+-- ========================
 CREATE TABLE PRODUTO (
     id_produto SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     preco DECIMAL(10,2) NOT NULL CHECK (preco >= 0),
-    f_id_pessoa INT,
-    FOREIGN KEY (f_id_pessoa) REFERENCES FUNCIONARIO(id_pessoa) ON DELETE SET NULL
+    id_funcionario INT,
+    FOREIGN KEY (id_funcionario) REFERENCES FUNCIONARIO(id_pessoa) ON DELETE SET NULL
 );
 
+-- ========================
+-- TABELAS ESPECIALIZADAS DE PRODUTO
+-- ========================
 CREATE TABLE CAMISETA (
     id_produto INT PRIMARY KEY,
     FOREIGN KEY (id_produto) REFERENCES PRODUTO(id_produto) ON DELETE CASCADE
@@ -44,34 +71,41 @@ CREATE TABLE CAMISETA (
 
 CREATE TABLE VINIL (
     id_produto INT PRIMARY KEY,
-    artista VARCHAR(100),
     FOREIGN KEY (id_produto) REFERENCES PRODUTO(id_produto) ON DELETE CASCADE
 );
 
 CREATE TABLE CD (
     id_produto INT PRIMARY KEY,
-    artista VARCHAR(100),
     FOREIGN KEY (id_produto) REFERENCES PRODUTO(id_produto) ON DELETE CASCADE
 );
 
+-- ========================
+-- TABELA CARRINHO
+-- ========================
 CREATE TABLE CARRINHO (
     id_carrinho SERIAL PRIMARY KEY,
-    c_id_pessoa INT,
-    FOREIGN KEY (c_id_pessoa) REFERENCES CLIENTE(id_pessoa) ON DELETE CASCADE
+    id_pessoa INT NOT NULL,
+    FOREIGN KEY (id_pessoa) REFERENCES PESSOA(id_pessoa) ON DELETE CASCADE
 );
 
+-- ========================
+-- TABELA ITEM_CARRINHO
+-- ========================
 CREATE TABLE ITEM_CARRINHO (
     id_item SERIAL PRIMARY KEY,
-    id_carrinho INT,
-    id_produto INT,
+    id_carrinho INT NOT NULL,
+    id_produto INT NOT NULL,
     quantidade INT NOT NULL CHECK (quantidade > 0),
     FOREIGN KEY (id_carrinho) REFERENCES CARRINHO(id_carrinho) ON DELETE CASCADE,
     FOREIGN KEY (id_produto) REFERENCES PRODUTO(id_produto) ON DELETE CASCADE
 );
 
+-- ========================
+-- TABELA PAGAMENTO
+-- ========================
 CREATE TABLE PAGAMENTO (
     id_pagamento SERIAL PRIMARY KEY,
-    id_carrinho INT UNIQUE,
+    id_carrinho INT UNIQUE NOT NULL,
     forma_pagamento VARCHAR(50),
     valor_total DECIMAL(10,2) NOT NULL CHECK (valor_total >= 0),
     data_pagamento DATE NOT NULL,
@@ -83,80 +117,58 @@ CREATE TABLE PAGAMENTO (
 -- ========================
 
 -- PESSOAS
-INSERT INTO PESSOA (id_pessoa, nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento) VALUES
-(1, 'João da Silva', 'joao@email.com', 'hash1', 'Rua A, 123', '11999990001', '1990-01-15'),
-(2, 'Bruno Souza', 'bruno@email.com', 'hash2', 'Rua B, 456', '11999990002', '1988-06-23'),
-(3, 'Carlos Lima', 'carlos@email.com', 'hash3', 'Rua C, 789', '11999990003', '1992-09-12'),
-(4, 'Daniela Castro', 'daniela@email.com', 'hash4', 'Rua D, 101', '11999990004', '1995-04-05'),
-(5, 'Eduardo Alves', 'eduardo@email.com', 'hash5', 'Rua E, 202', '11999990005', '1991-11-20'),
-(6, 'Fernanda Rocha', 'fernanda@email.com', 'hash6', 'Rua F, 303', '11999990006', '1985-02-28'),
-(7, 'Gustavo Melo', 'gustavo@email.com', 'hash7', 'Rua G, 404', '11999990007', '1989-07-17'),
-(8, 'Helena Martins', 'helena@email.com', 'hash8', 'Rua H, 505', '11999990008', '1993-12-01'),
-(9, 'Igor Ferreira', 'igor@email.com', 'hash9', 'Rua I, 606', '11999990009', '1990-10-30'),
-(10, 'Juliana Dias', 'juliana@email.com', 'hash10', 'Rua J, 707', '11999990010', '1994-08-14');
+INSERT INTO PESSOA (id_pessoa) VALUES
+(1),(2),(3),(4),(5),(6),(7),(8);
 
 -- CLIENTES
-INSERT INTO CLIENTE (id_pessoa) VALUES
-(1), (2), (3), (4), (5);
+INSERT INTO CLIENTE (id_pessoa, nome_cliente, email_cliente, senha_cliente, endereco_cliente, telefone_cliente, data_nascimento) VALUES
+(1, 'Lara Viana', 'lara.viana@email.com', 'senhaLara123', 'Av. das Flores, 123', '11988887777', '1992-03-10'),
+(2, 'Mateus Ribeiro', 'mateus.ribeiro@email.com', 'senhaMateus456', 'Rua das Acácias, 45', '11988887778', '1989-07-22'),
+(3, 'Camila Nunes', 'camila.nunes@email.com', 'senhaCamila789', 'Rua dos Lírios, 78', '11988887779', '1991-11-05'),
+(4, 'Felipe Souza', 'felipe.souza@email.com', 'senhaFelipe101', 'Alameda Santos, 101', '11988887780', '1990-02-14'),
+(5, 'Mariana Alves', 'mariana.alves@email.com', 'senhaMariana202', 'Rua Primavera, 202', '11988887781', '1993-05-19');
 
 -- FUNCIONARIOS
-INSERT INTO FUNCIONARIO (id_pessoa, cargo) VALUES
-(6, 'Funcionário'),
-(7, 'Funcionário'),
-(8, 'Gerente');
-
--- GERENTE
-INSERT INTO GERENTE (id_pessoa) VALUES
-(8);
+INSERT INTO FUNCIONARIO (id_pessoa, nome_func, email_func, senha_func, endereco_func, telefone_func, data_nascimento, cargo, salario, carga_horaria) VALUES
+(6, 'Ricardo Lima', 'ricardo.lima@email.com', 'senhaRicardo303', 'Av. Paulista, 303', '11988887782', '1985-06-12', 'Funcionário', 2800.00, 40),
+(7, 'Sofia Martins', 'sofia.martins@email.com', 'senhaSofia404', 'Rua das Palmeiras, 404', '11988887783', '1987-09-18', 'Funcionário', 2800.00, 40),
+(8, 'Thiago Carvalho', 'thiago.carvalho@email.com', 'senhaThiago505', 'Av. Brasil, 505', '11988887784', '1983-12-03', 'Gerente', 5000.00, 40);
 
 -- PRODUTOS
-INSERT INTO PRODUTO (id_produto, nome, preco, f_id_pessoa) VALUES
-(1, 'Camiseta Rock', 79.90, 6),
-(2, 'Vinil Metallica - Master of Puppets', 129.90, 7),
-(3, 'CD Angra - Temple of Shadows', 49.90, 6),
-(4, 'Camiseta Jazz', 89.90, 7),
-(5, 'Vinil Beatles - Revolver', 139.90, 8),
-(6, 'King Crimson - In the Court of the Crimson King', 249.90, 6),
-(7, 'Vinil Megadeth - Rust in Peace', 149.90, 7),
-(8, 'CD Metallica - Ride the Lightning', 69.90, 6),
-(9, 'Vinil Pink Floyd - Dark Side of the Moon', 159.90, 7),
-(10, 'CD Queen - A Night at the Opera', 59.90, 6);
+INSERT INTO PRODUTO (nome, preco, id_funcionario) VALUES
+('Camiseta Rock', 79.90, 6),
+('Vinil Metallica - Master of Puppets', 129.90, 7),
+('CD Angra - Temple of Shadows', 49.90, 6),
+('Camiseta Jazz', 89.90, 7),
+('Vinil Beatles - Revolver', 139.90, 8),
+('King Crimson - In the Court of the Crimson King', 249.90, 6),
+('Vinil Megadeth - Rust in Peace', 149.90, 7),
+('CD Metallica - Ride the Lightning', 69.90, 6),
+('Vinil Pink Floyd - Dark Side of the Moon', 159.90, 7),
+('CD Queen - A Night at the Opera', 59.90, 6);
 
 -- CAMISETAS
-INSERT INTO CAMISETA (id_produto) VALUES
-(1),
-(4);
+INSERT INTO CAMISETA (id_produto) VALUES (1),(4);
 
 -- VINIS
-INSERT INTO VINIL (id_produto, artista) VALUES
-(2, 'Metallica'),
-(5, 'The Beatles'),
-(7, 'Megadeth'),
-(9, 'Pink Floyd');
+INSERT INTO VINIL (id_produto) VALUES (2),(5),(7),(9);
 
 -- CDS
-INSERT INTO CD (id_produto, artista) VALUES
-(3, 'Angra'),
-(6, 'King Crimson'),
-(8, 'Metallica'),
-(10, 'Queen');
+INSERT INTO CD (id_produto) VALUES (3),(6),(8),(10);
 
 -- CARRINHOS
-INSERT INTO CARRINHO (id_carrinho, c_id_pessoa) VALUES
-(1, 1),
-(2, 2),
-(3, 3);
+INSERT INTO CARRINHO (id_pessoa) VALUES (1),(2),(6),(7);
 
 -- ITENS CARRINHO
-INSERT INTO ITEM_CARRINHO (id_item, id_carrinho, id_produto, quantidade) VALUES
-(1, 1, 1, 2),
-(2, 1, 3, 1),
-(3, 2, 2, 1),
-(4, 2, 4, 2),
-(5, 3, 5, 1);
+INSERT INTO ITEM_CARRINHO (id_carrinho, id_produto, quantidade) VALUES
+(1,1,2),
+(1,3,1),
+(2,2,1),
+(2,4,2),
+(3,5,1);
 
 -- PAGAMENTOS
-INSERT INTO PAGAMENTO (id_pagamento, id_carrinho, forma_pagamento, valor_total, data_pagamento) VALUES
-(1, 1, 'Cartão de Crédito', 209.70, '2025-09-10'),
-(2, 2, 'Boleto', 309.80, '2025-09-11'),
-(3, 3, 'Pix', 139.90, '2025-09-12');
+INSERT INTO PAGAMENTO (id_carrinho, forma_pagamento, valor_total, data_pagamento) VALUES
+(1, 'Cartão de Crédito', 209.70, '2025-09-10'),
+(2, 'Boleto', 309.80, '2025-09-11'),
+(3, 'Pix', 139.90, '2025-09-12');

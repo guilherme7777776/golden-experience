@@ -70,14 +70,19 @@ app.use((err, req, res, next) => {
 // só mexa nessa parte
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Importando as rotas
-const loginRoutes = require('./routes/loginRoutes');
-app.use('/login', loginRoutes);
 
 const menuRoutes = require('./routes/menuRoutes');
 app.use('/menu', menuRoutes);
 
 const pessoaRoutes = require('./routes/pessoaRoutes');
 app.use('/pessoa', pessoaRoutes);
+
+const produtoRoutes = require('./routes/produtoRoutes');
+app.use('/produto', produtoRoutes);
+
+const pagamentoRoutes = require('./routes/pagamentoRoutes');
+app.use('/pagamento', pagamentoRoutes);
+
 
 
 

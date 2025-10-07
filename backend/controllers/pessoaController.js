@@ -8,8 +8,11 @@ exports.abrirCrudPessoa = (req, res) => {
 
 exports.listarPessoas = async (req, res) => {
   console.log("wiogfhiwhegefiohoerwg");
+  console.log("anubis");
   try {
-    const result = await query('SELECT * FROM CLIENTE ORDER BY id_pessoa');
+    const result = await query('SELECT P.* FROM CLIENTE C JOIN PESSOA P ON c.id_pessoa =  p.id_pessoa');
+    
+    console.log(result);
     res.json(result.rows);
     
   } catch (error) {

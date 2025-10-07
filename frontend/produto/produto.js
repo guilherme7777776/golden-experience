@@ -87,12 +87,19 @@ async function buscarProduto() {
 }
 
 function preencherFormulario(produto) {
-  currentProductId = produto.id_produto;
-  searchId.value = produto.id_produto;
   document.getElementById('nome').value = produto.nome;
   document.getElementById('preco').value = produto.preco;
   document.getElementById('f_id_pessoa').value = produto.f_id_pessoa || '';
+
+  // Aqui é o select do tipo
+  const selectTipo = document.getElementById('tipo'); // ou o id que você usa
+  if (produto.tipo) {
+    selectTipo.value = produto.tipo.toLowerCase(); // valor deve bater com o "value" das options
+  } else {
+    selectTipo.value = ''; // se não tiver tipo, limpa
+  }
 }
+
 
 function incluirProduto() {
   currentProductId = searchId.value;
@@ -126,7 +133,8 @@ async function salvarOperacao() {
     id_produto: searchId.value,
     nome: formData.get('nome'),
     preco: formData.get('preco'),
-    f_id_pessoa: formData.get('f_id_pessoa')
+    f_id_pessoa: formData.get('f_id_pessoa'),
+    tipo: formData.get('tipo') // ← novo campo
   };
 
   try {
@@ -199,6 +207,7 @@ function renderizarTabela(produtos) {
       <td><button class="btn-id" onclick="selecionarProduto(${prod.id_produto})">${prod.id_produto}</button></td>
       <td>${prod.nome}</td>
       <td>R$ ${parseFloat(prod.preco).toFixed(2)}</td>
+      <td>${prod.tipo || 'S'}</td> 
       <td>${prod.f_id_pessoa || ''}</td>
     `;
     produtosTableBody.appendChild(row);
@@ -219,6 +228,7 @@ function renderizarTabela(produtos) {
       <td><button class="btn-id" onclick="selecionarProduto(${prod.id_produto})">${prod.id_produto}</button></td>
       <td>${prod.nome}</td>
       <td>R$ ${parseFloat(prod.preco).toFixed(2)}</td>
+      <td>${prod.tipo}</td>
       <td>${prod.f_id_pessoa || ''}</td>
     `;
     produtosTableBody.appendChild(row);

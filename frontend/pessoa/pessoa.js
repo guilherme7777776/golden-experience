@@ -97,10 +97,9 @@ async function buscarPessoa() {
     searchId.focus();
     try {
         const response = await fetch(`${API_BASE_URL}/pessoa/${id}`);
-        console.log(response, "resposte")
         
-        console.log('ID:', id);
-        console.log('URL:', `${API_BASE_URL}/pessoa/${id}`);
+        
+        
 
         if (response.ok) {
             const pessoa = await response.json();
@@ -192,7 +191,7 @@ async function excluirPessoa() {
     mostrarBotoes(false, false, false, false, true, true);// mostrarBotoes(btBuscar, btIncluir, btAlterar, btExcluir, btSalvar, btCancelar)           
     operacao = 'excluir';
 }
-console.log()
+
 async function salvarOperacao() {
     const formData = new FormData(form);
     
@@ -207,10 +206,10 @@ async function salvarOperacao() {
         
     };
     
-    console.log(pessoa,"AAAAAAAAAAAAAAAAAAAA")
+    
     try {
         let responsePessoa;
-
+        
         if (operacao === 'incluir') {
             
             responsePessoa = await fetch(`${API_BASE_URL}/pessoa`, {
@@ -237,14 +236,13 @@ async function salvarOperacao() {
                 method: 'DELETE'
             });
         }
-
         if (responsePessoa.ok && (operacao === 'incluir' || operacao === 'alterar')) {
             mostrarMensagem('Operação ' + operacao + ' realizada com sucesso!', 'success');
             limparFormulario();
             carregarPessoas();
             try {
                 const response = await fetch(`${API_BASE_URL}/pessoa`);
-                console.log("weghouiwhegiow",response);
+                console.log("oi")
         
                 if (response.ok) {
                     const pessoas = await response.json();
@@ -272,6 +270,7 @@ async function salvarOperacao() {
         
                 if (response.ok) {
                     const pessoas = await response.json();
+                    
                     renderizarTabelaPessoas(pessoas);
                 } else {
                     throw new Error('Erro ao carregar pessoas');
@@ -315,11 +314,12 @@ function obterIdValido() {
 async function carregarPessoas() {
     try {
         const response = await fetch(`${API_BASE_URL}/pessoa`);
-        console.log("weghouiwhegiow",response);
-
+        console.log(response)
         if (response.ok) {
             const pessoas = await response.json();
+            console.log(pessoas)
             renderizarTabelaPessoas(pessoas);
+            
         } else {
             throw new Error('Erro ao carregar pessoas');
         }
@@ -333,11 +333,13 @@ async function carregarPessoas() {
 function renderizarTabelaPessoas(pessoas) {
     
     pessoasTableBody.innerHTML = '';
-    
+    console.log("oi",pessoa.data_nascimento)
     
     pessoas.forEach(pessoa => {
         let data = new Date(pessoa.data_nascimento);
         let dataFormatada = data.toISOString().split('T')[0]; // "1990-01-15"
+        
+        
         const row = document.createElement('tr');
         row.innerHTML = `
                     <td>
