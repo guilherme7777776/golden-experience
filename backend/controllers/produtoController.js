@@ -1,6 +1,7 @@
 const { query } = require('../database');
 const path = require('path');
 
+console.log("VEJA A REPETIÇÃO DO RENDERIZAR TABELA PRODUTO")
 exports.abrirCrudProduto = (req, res) => {
   console.log("abrir  crud")
   res.sendFile(path.join(__dirname, '../../frontend/produto/produto.html'));
@@ -10,7 +11,7 @@ exports.abrirCrudProduto = (req, res) => {
 exports.listarProdutos = async (req, res) => {
   try {
     const result = await query(`
-      SELECT p.id_produto, p.nome, p.preco, p.f_id_pessoa,
+      SELECT p.id_produto, p.nome, p.preco, p.id_funcionario,
        CASE
            WHEN c.id_produto IS NOT NULL THEN 'CAMISETA'
            WHEN v.id_produto IS NOT NULL THEN 'VINIL'
@@ -24,7 +25,7 @@ exports.listarProdutos = async (req, res) => {
       ORDER BY p.id_produto;
 
     `);
-    
+    console.log("res:",result)
     res.json(result.rows);
   } catch (error) {
     console.error('Erro ao listar produtos:', error);
@@ -39,7 +40,7 @@ exports.obterProduto = async (req, res) => {
   const id = parseInt(req.params.id);
   try {
     const result = await query(`
-       SELECT p.id_produto, p.nome, p.preco, p.f_id_pessoa,
+       SELECT p.id_produto, p.nome, p.preco, p.id_funcionario,
              CASE
                  WHEN c.id_produto IS NOT NULL THEN 'CAMISETA'
                  WHEN v.id_produto IS NOT NULL THEN 'VINIL'
@@ -69,13 +70,13 @@ exports.obterProduto = async (req, res) => {
 // CRIAR
 // CRIAR
 exports.criarProduto = async (req, res) => {
-  const { id_produto, nome, preco, f_id_pessoa, tipo } = req.body;
+  const { id_produto, nome, preco, id_funcionario, tipo } = req.body;
 
   try {
     // Verifica se o funcionário existe
     const verificaFuncionario = await query(
       'SELECT * FROM FUNCIONARIO WHERE id_pessoa = $1',
-      [f_id_pessoa]
+      [id_funcionario]
     );
 
     if (verificaFuncionario.rows.length === 0) {
@@ -84,8 +85,8 @@ exports.criarProduto = async (req, res) => {
 
     // Inserir na tabela PRODUTO
     const result = await query(
-      'INSERT INTO PRODUTO (id_produto, nome, preco, f_id_pessoa) VALUES ($1, $2, $3, $4) RETURNING *',
-      [id_produto, nome, preco, f_id_pessoa]
+      'INSERT INTO PRODUTO (id_produto, nome, preco, id_funcionario) VALUES ($1, $2, $3, $4) RETURNING *',
+      [id_produto, nome, preco, id_funcionario]
     );
 
     const idProduto = result.rows[0].id_produto;
@@ -115,12 +116,12 @@ exports.criarProduto = async (req, res) => {
 // ATUALIZAR
 exports.atualizarProduto = async (req, res) => {
   const id = parseInt(req.params.id);
-  const { nome, preco, f_id_pessoa } = req.body;
+  const { nome, preco, id_funcionario } = req.body;
 
   try {
     const result = await query(
-      'UPDATE produto SET nome = $1, preco = $2, f_id_pessoa = $3 WHERE id_produto = $4 RETURNING *',
-      [nome, preco, f_id_pessoa, id]
+      'UPDATE produto SET nome = $1, preco = $2, id_funcionario = $3 WHERE id_produto = $4 RETURNING *',
+      [nome, preco, id_funcionario, id]
     );
 
     if (result.rows.length === 0) {

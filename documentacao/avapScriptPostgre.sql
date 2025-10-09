@@ -1,11 +1,26 @@
 SET search_path TO public;
+SET search_path TO public;
+
+-- DROP em ordem de dependência
+DROP TABLE IF EXISTS PAGAMENTO CASCADE;
+DROP TABLE IF EXISTS ITEM_CARRINHO CASCADE;
+DROP TABLE IF EXISTS CARRINHO CASCADE;
+DROP TABLE IF EXISTS CD CASCADE;
+DROP TABLE IF EXISTS VINIL CASCADE;
+DROP TABLE IF EXISTS CAMISETA CASCADE;
+DROP TABLE IF EXISTS PRODUTO CASCADE;
+DROP TABLE IF EXISTS GERENTE CASCADE;
+DROP TABLE IF EXISTS FUNCIONARIO CASCADE;
+DROP TABLE IF EXISTS CLIENTE CASCADE;
+DROP TABLE IF EXISTS PESSOA CASCADE;
+SET search_path TO public;
 
 
 -- ========================
 -- TABELA PESSOA
 -- ========================
 CREATE TABLE PESSOA (
-    id_pessoa SERIAL PRIMARY KEY
+    id_pessoa INT PRIMARY KEY
 );
 
 -- ========================
@@ -14,7 +29,7 @@ CREATE TABLE PESSOA (
 CREATE TABLE CLIENTE (
     id_pessoa INT PRIMARY KEY,
     nome_cliente VARCHAR(100) NOT NULL,
-    email_cliente VARCHAR(70) NOT NULL UNIQUE,
+    email_cliente VARCHAR(70) NOT NULL,
     senha_cliente VARCHAR(255) NOT NULL,
     endereco_cliente VARCHAR(100),
     telefone_cliente VARCHAR(20),
@@ -22,6 +37,9 @@ CREATE TABLE CLIENTE (
     FOREIGN KEY (id_pessoa) REFERENCES PESSOA(id_pessoa) ON DELETE CASCADE
 );
 
+-- ========================
+-- TABELA FUNCIONARIO
+-- ========================
 -- ========================
 -- TABELA FUNCIONARIO
 -- ========================
@@ -33,11 +51,19 @@ CREATE TABLE FUNCIONARIO (
     endereco_func VARCHAR(100),
     telefone_func VARCHAR(20),
     data_nascimento DATE,
-    cargo VARCHAR(50),
     salario DECIMAL(10,2),
-    carga_horaria INT,
+    carga_horaria NUMERIC(5,2) CHECK (carga_horaria > 0),
     FOREIGN KEY (id_pessoa) REFERENCES PESSOA(id_pessoa) ON DELETE CASCADE
 );
+
+-- ========================
+-- TABELA GERENTE
+-- ========================
+CREATE TABLE GERENTE (
+    id_pessoa INT PRIMARY KEY,
+    FOREIGN KEY (id_pessoa) REFERENCES FUNCIONARIO(id_pessoa) ON DELETE CASCADE
+);
+
 
 -- ========================
 -- TABELA PRODUTO
@@ -109,6 +135,8 @@ CREATE TABLE PAGAMENTO (
 INSERT INTO PESSOA (id_pessoa) VALUES
 (1),(2),(3),(4),(5),(6),(7),(8);
 
+
+
 -- CLIENTES
 INSERT INTO CLIENTE (id_pessoa, nome_cliente, email_cliente, senha_cliente, endereco_cliente, telefone_cliente, data_nascimento) VALUES
 (1, 'Lara Viana', 'lara.viana@email.com', 'senhaLara123', 'Av. das Flores, 123', '11988887777', '1992-03-10'),
@@ -118,10 +146,13 @@ INSERT INTO CLIENTE (id_pessoa, nome_cliente, email_cliente, senha_cliente, ende
 (5, 'Mariana Alves', 'mariana.alves@email.com', 'senhaMariana202', 'Rua Primavera, 202', '11988887781', '1993-05-19');
 
 -- FUNCIONARIOS
-INSERT INTO FUNCIONARIO (id_pessoa, nome_func, email_func, senha_func, endereco_func, telefone_func, data_nascimento, cargo, salario, carga_horaria) VALUES
-(6, 'Ricardo Lima', 'ricardo.lima@email.com', 'senhaRicardo303', 'Av. Paulista, 303', '11988887782', '1985-06-12', 'Funcionário', 2800.00, 40),
-(7, 'Sofia Martins', 'sofia.martins@email.com', 'senhaSofia404', 'Rua das Palmeiras, 404', '11988887783', '1987-09-18', 'Funcionário', 2800.00, 40),
-(8, 'Thiago Carvalho', 'thiago.carvalho@email.com', 'senhaThiago505', 'Av. Brasil, 505', '11988887784', '1983-12-03', 'Gerente', 5000.00, 40);
+INSERT INTO FUNCIONARIO (id_pessoa, nome_func, email_func, senha_func, endereco_func, telefone_func, data_nascimento, salario, carga_horaria) VALUES
+(6, 'Ricardo Lima', 'ricardo.lima@email.com', 'senhaRicardo303', 'Av. Paulista, 303', '11988887782', '1985-06-12', 2800.00, 40),
+(7, 'Sofia Martins', 'sofia.martins@email.com', 'senhaSofia404', 'Rua das Palmeiras, 404', '11988887783', '1987-09-18', 2800.00, 40),
+(8, 'Thiago Carvalho', 'thiago.carvalho@email.com', 'senhaThiago505', 'Av. Brasil, 505', '11988887784', '1983-12-03', 5000.00, 40);
+
+INSERT INTO GERENTE (id_pessoa) VALUES
+(6);
 
 -- PRODUTOS
 INSERT INTO PRODUTO (id_produto, nome, preco, id_funcionario) VALUES

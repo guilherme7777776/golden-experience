@@ -71,11 +71,15 @@ app.use((err, req, res, next) => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Importando as rotas
 
+
 const menuRoutes = require('./routes/menuRoutes');
 app.use('/menu', menuRoutes);
 
 const pessoaRoutes = require('./routes/pessoaRoutes');
 app.use('/pessoa', pessoaRoutes);
+
+const funcionarioRoutes = require('./routes/funcionarioRoutes');
+app.use('/funcionario', funcionarioRoutes);
 
 const produtoRoutes = require('./routes/produtoRoutes');
 app.use('/produto', produtoRoutes);

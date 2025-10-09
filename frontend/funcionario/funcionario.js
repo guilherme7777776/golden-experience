@@ -1,9 +1,13 @@
-// Configuração da API, IP e porta.
+// ========================
+// Configuração da API
+// ========================
 const API_BASE_URL = 'http://localhost:3001';
-let currentPersonId = null;
+let currentFuncionarioId = null;
 let operacao = null;
 
+// ========================
 // Elementos do DOM
+// ========================
 const form = document.getElementById('pessoaForm');
 const searchId = document.getElementById('searchId');
 const btnBuscar = document.getElementById('btnBuscar');
@@ -15,31 +19,36 @@ const btnSalvar = document.getElementById('btnSalvar');
 const pessoasTableBody = document.getElementById('pessoasTableBody');
 const messageContainer = document.getElementById('messageContainer');
 
-// Inicialização: carregar lista de pessoas
+// ========================
+// Inicialização
+// ========================
 document.addEventListener('DOMContentLoaded', () => {
-    carregarPessoas();
+    carregarFuncionarios();
     mostrarBotoes(true, false, false, false, false, false);
     bloquearCampos(false);
 });
 
+// ========================
 // Event Listeners
-btnBuscar.addEventListener('click', buscarPessoa);
-btnIncluir.addEventListener('click', incluirPessoa);
-btnAlterar.addEventListener('click', alterarPessoa);
-btnExcluir.addEventListener('click', excluirPessoa);
+// ========================
+btnBuscar.addEventListener('click', buscarFuncionario);
+btnIncluir.addEventListener('click', incluirFuncionario);
+btnAlterar.addEventListener('click', alterarFuncionario);
+btnExcluir.addEventListener('click', excluirFuncionario);
 btnCancelar.addEventListener('click', cancelarOperacao);
 btnSalvar.addEventListener('click', salvarOperacao);
 
-// Mostrar mensagens na tela
+// ========================
+// Funções Auxiliares
+// ========================
 function mostrarMensagem(texto, tipo = 'info') {
     messageContainer.innerHTML = `<div class="message ${tipo}">${texto}</div>`;
     setTimeout(() => messageContainer.innerHTML = '', 3000);
 }
 
-// Bloquear ou liberar campos do formulário
 function bloquearCampos(bloquearId) {
     const inputs = form.querySelectorAll('input');
-    inputs.forEach((input, index) => {
+    inputs.forEach(input => {
         if (input.id === 'id_pessoa' || input.id === 'searchId') {
             input.disabled = bloquearId;
         } else {
@@ -48,13 +57,11 @@ function bloquearCampos(bloquearId) {
     });
 }
 
-// Limpar formulário
 function limparFormulario() {
     form.reset();
-    currentPersonId = null;
+    currentFuncionarioId = null;
 }
 
-// Mostrar ou esconder botões conforme parâmetros (true = mostrar)
 function mostrarBotoes(buscar, incluir, alterar, excluir, salvar, cancelar) {
     btnBuscar.style.display = buscar ? 'inline-block' : 'none';
     btnIncluir.style.display = incluir ? 'inline-block' : 'none';
@@ -64,8 +71,13 @@ function mostrarBotoes(buscar, incluir, alterar, excluir, salvar, cancelar) {
     btnCancelar.style.display = cancelar ? 'inline-block' : 'none';
 }
 
-// Buscar pessoa pelo ID
-async function buscarPessoa() {
+// ========================
+// Funções CRUD
+// ========================
+
+// Buscar funcionário pelo ID
+async function buscarFuncionario() {
+    
     const id = searchId.value.trim();
     if (!id) {
         mostrarMensagem('Digite um ID para buscar', 'warning');
@@ -73,79 +85,67 @@ async function buscarPessoa() {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/pessoa/${id}`);
+        const response = await fetch(`${API_BASE_URL}/funcionario/${id}`);
         if (response.ok) {
-            const pessoa = await response.json();
-            preencherFormulario(pessoa);
+            const funcionario = await response.json();
+            preencherFormulario(funcionario);
             mostrarBotoes(false, false, true, true, false, true);
             bloquearCampos(false);
-            mostrarMensagem('Pessoa encontrada!', 'success');
+            mostrarMensagem('Funcionário encontrado!', 'success');
         } else if (response.status === 404) {
             limparFormulario();
             searchId.value = id;
-
-            // tenta pegar a resposta JSON (caso o backend retorne info extra)
-            let data;
-            try {
-                data = await response.json();
-            } catch {
-                data = null;
-            }
-            console.log("data:",data)
             mostrarBotoes(true, true, false, false, false, false);
             bloquearCampos(false);
-
-            if (data && data.is_funcionario) {
-                mostrarMensagem('Essa pessoa é um funcionário e não pode ser cadastrada como cliente.', 'warning');
-            } else {
-                mostrarMensagem('Pessoa não encontrada. Você pode incluir uma nova pessoa.', 'info');
-            }
+            mostrarMensagem('Funcionário não encontrado. Você pode incluir um novo.', 'info');
         } else {
-            throw new Error('Erro ao buscar pessoa');
+            throw new Error('Erro ao buscar funcionário');
         }
     } catch (error) {
         console.error(error);
-        mostrarMensagem('Erro ao buscar pessoa', 'error');
+        mostrarMensagem('Erro ao buscar funcionário', 'error');
     }
 }
 
-// Preencher formulário com dados da pessoa
-function preencherFormulario(pessoa) {
-    currentPersonId = pessoa.id_pessoa;
-    searchId.value = pessoa.id_pessoa || '';
-    document.getElementById('id_pessoa').value = pessoa.id_pessoa || '';
-    document.getElementById('nome_pessoa').value = pessoa.nome_pessoa || '';
-    document.getElementById('email_pessoa').value = pessoa.email_pessoa || '';
-    document.getElementById('senha_pessoa').value = pessoa.senha_pessoa || '';
-    document.getElementById('endereco_pessoa').value = pessoa.endereco_pessoa || '';
-    document.getElementById('telefone_pessoa').value = pessoa.telefone_pessoa || '';
-    if (pessoa.data_nascimento) {
-        document.getElementById('data_nascimento').value = new Date(pessoa.data_nascimento).toISOString().split('T')[0];
+// Preencher formulário com dados do funcionário
+function preencherFormulario(funcionario) {
+    currentFuncionarioId = funcionario.id_pessoa;
+    searchId.value = funcionario.id_pessoa || '';
+    document.getElementById('id_pessoa').value = funcionario.id_pessoa || '';
+    document.getElementById('nome_pessoa').value = funcionario.nome_pessoa || '';
+    document.getElementById('email_pessoa').value = funcionario.email_pessoa || '';
+    document.getElementById('senha_pessoa').value = funcionario.senha_pessoa || '';
+    document.getElementById('endereco_pessoa').value = funcionario.endereco_pessoa || '';
+    document.getElementById('telefone_pessoa').value = funcionario.telefone_pessoa || '';
+    document.getElementById('salario').value = funcionario.salario || '';
+    document.getElementById('carga_horaria').value = funcionario.carga_horaria || '';
+    if (funcionario.data_nascimento) {
+        document.getElementById('data_nascimento').value = new Date(funcionario.data_nascimento).toISOString().split('T')[0];
     } else {
         document.getElementById('data_nascimento').value = '';
     }
 }
 
-// Iniciar inclusão de nova pessoa
-function incluirPessoa() {
-    mostrarMensagem('Digite os dados!', 'success');
+// Iniciar inclusão de novo funcionário
+function incluirFuncionario() {
+    mostrarMensagem('Digite os dados do novo funcionário!', 'success');
     bloquearCampos(true);
     mostrarBotoes(false, false, false, false, true, true);
     document.getElementById('nome_pessoa').focus();
     operacao = 'incluir';
 }
 
-// Iniciar alteração de pessoa existente
-function alterarPessoa() {
-    mostrarMensagem('Digite os dados!', 'success');
+// Iniciar alteração de funcionário existente
+function alterarFuncionario() {
+    mostrarMensagem('Edite os dados do funcionário!', 'success');
     bloquearCampos(true);
     mostrarBotoes(false, false, false, false, true, true);
     document.getElementById('nome_pessoa').focus();
     operacao = 'alterar';
 }
 
-// Iniciar exclusão de pessoa
-function excluirPessoa() {
+// Iniciar exclusão de funcionário
+function excluirFuncionario() {
     mostrarMensagem('Confirme a exclusão!', 'info');
     bloquearCampos(false);
     mostrarBotoes(false, false, false, false, true, true);
@@ -155,8 +155,7 @@ function excluirPessoa() {
 // Salvar operação (incluir, alterar ou excluir)
 async function salvarOperacao() {
     const formData = new FormData(form);
-    console.log("form:",formData)
-    const pessoa = {
+    const funcionario = {
         id_pessoa: document.getElementById('searchId').value,
         nome_pessoa: formData.get('nome_pessoa'),
         email_pessoa: formData.get('email_pessoa'),
@@ -164,34 +163,32 @@ async function salvarOperacao() {
         endereco_pessoa: formData.get('endereco_pessoa'),
         telefone_pessoa: formData.get('telefone_pessoa'),
         data_nascimento: formData.get('data_nascimento') || null,
+        salario: parseFloat(formData.get('salario')) || 0,
+        carga_horaria: parseFloat(formData.get('carga_horaria')) || 0
     };
-    console.log("id:",document.getElementById('searchId').value)
-    console.log("pessoa")
-    console.log(pessoa)
+
     try {
         let response;
         if (operacao === 'incluir') {
-            response = await fetch(`${API_BASE_URL}/pessoa`, {
+            response = await fetch(`${API_BASE_URL}/funcionario`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pessoa),
+                body: JSON.stringify(funcionario),
             });
-            console.log(pessoa)
-            console.log("sshjighjewior")
         } else if (operacao === 'alterar') {
-            response = await fetch(`${API_BASE_URL}/pessoa/${currentPersonId}`, {
+            response = await fetch(`${API_BASE_URL}/funcionario/${currentFuncionarioId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pessoa,),
+                body: JSON.stringify(funcionario),
             });
         } else if (operacao === 'excluir') {
-            response = await fetch(`${API_BASE_URL}/pessoa/${currentPersonId}`, { method: 'DELETE' });
+            response = await fetch(`${API_BASE_URL}/funcionario/${currentFuncionarioId}`, { method: 'DELETE' });
         }
 
         if (response.ok) {
             mostrarMensagem(`Operação ${operacao} realizada com sucesso!`, 'success');
             limparFormulario();
-            carregarPessoas();
+            carregarFuncionarios();
             mostrarBotoes(true, false, false, false, false, false);
             bloquearCampos(false);
             searchId.focus();
@@ -214,59 +211,56 @@ function cancelarOperacao() {
     mostrarMensagem('Operação cancelada', 'info');
 }
 
-// Carregar e renderizar lista de pessoas
-async function carregarPessoas() {
+// Carregar e renderizar lista de funcionários
+async function carregarFuncionarios() {
     try {
-        const response = await fetch(`${API_BASE_URL}/pessoa`);
-        if (!response.ok) throw new Error('Erro ao carregar pessoas');
-        const pessoas = await response.json();
-        
-        renderizarTabelaPessoas(pessoas);
+        const response = await fetch(`${API_BASE_URL}/funcionario`);
+        if (!response.ok) throw new Error('Erro ao carregar funcionários');
+        const funcionarios = await response.json();
+        renderizarTabelaFuncionarios(funcionarios);
     } catch (error) {
         console.error(error);
-        mostrarMensagem('Erro ao carregar lista de pessoas', 'error');
+        mostrarMensagem('Erro ao carregar lista de funcionários', 'error');
     }
 }
 
-// Renderizar tabela com pessoas
-function renderizarTabelaPessoas(pessoas) {
+function renderizarTabelaFuncionarios(funcionarios) {
     pessoasTableBody.innerHTML = '';
 
-    pessoas.forEach(pessoa => {
+    funcionarios.forEach(funcionario => {
         let dataFormatada = '';
-        if (pessoa.data_nascimento) {
-            dataFormatada = new Date(pessoa.data_nascimento).toISOString().split('T')[0];
+        if (funcionario.data_nascimento) {
+            dataFormatada = new Date(funcionario.data_nascimento).toISOString().split('T')[0];
         }
+
         const row = document.createElement('tr');
 
-        // Cria o botão do ID
         const idButton = document.createElement('button');
-        idButton.textContent = pessoa.id_pessoa;
-        idButton.classList.add('btn-id'); // mantém verde
+        idButton.textContent = funcionario.id_pessoa;
+        idButton.classList.add('btn-id');
 
-        // Se for funcionário, desativa o botão
-        // Se for funcionário, desativa e pinta de cinza
-        if (pessoa.isfuncionario || pessoa.isFuncionario) {
-            
+        // Desativa botão se não for funcionário ou gerente
+        if (funcionario.tipo === 'Cliente') { 
             idButton.style.cursor = 'not-allowed';
-            idButton.style.backgroundColor = 'gray'; // garante cor cinza
+            idButton.style.backgroundColor = 'gray';
             idButton.style.borderColor = 'gray';
             idButton.style.color = 'white';
             idButton.style.opacity = '0.9';
         } else {
-            idButton.onclick = () => selecionarPessoa(pessoa.id_pessoa);
+            idButton.onclick = () => selecionarFuncionario(funcionario.id_pessoa);
         }
 
-
-        // Cria células da linha
         const cells = [
             idButton,
-            pessoa.nome_pessoa || '',
-            pessoa.email_pessoa || '',
-            pessoa.senha_pessoa || '',
-            pessoa.endereco_pessoa || '',
-            pessoa.telefone_pessoa || '',
-            dataFormatada
+            funcionario.nome_pessoa || '',
+            funcionario.email_pessoa || '',
+            funcionario.senha_pessoa || '',
+            funcionario.endereco_pessoa || '',
+            funcionario.telefone_pessoa || '',
+            dataFormatada,
+            funcionario.salario || '',
+            funcionario.carga_horaria || '',
+            funcionario.tipo // Cliente, Funcionário ou Gerente
         ];
 
         cells.forEach(cell => {
@@ -281,8 +275,8 @@ function renderizarTabelaPessoas(pessoas) {
 }
 
 
-// Selecionar pessoa da tabela e buscar seus dados
-async function selecionarPessoa(id) {
+// Selecionar funcionário da tabela e buscar seus dados
+async function selecionarFuncionario(id) {
     searchId.value = id;
-    await buscarPessoa();
+    await buscarFuncionario();
 }

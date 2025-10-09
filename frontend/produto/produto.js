@@ -218,7 +218,7 @@ async function selecionarProduto(id) {
   searchId.value = id;
   await buscarProduto();
 }
-
+//aqui
 
 function renderizarTabela(produtos) {
   produtosTableBody.innerHTML = '';
