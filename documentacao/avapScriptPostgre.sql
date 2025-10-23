@@ -131,46 +131,41 @@ FOREIGN KEY (id_pagamento) REFERENCES PAGAMENTO(id_pagamento) ON DELETE CASCADE,
 FOREIGN KEY (id_forma_pagamento) REFERENCES FORMA_PAGAMENTO(id_forma_pagamento) ON DELETE CASCADE
 );
 
--- PESSOA
-INSERT INTO PESSOA (id_pessoa) VALUES
-(1), (2), (3), (4), (5), (6), (7), (8), (9), (10);
+-- INSERTS
+INSERT INTO PESSOA (id_pessoa, nome, data_nascimento, endereco) VALUES
+(1, 'João Silva', '1985-05-10', 'Rua A, 10'),
+(2, 'Maria Santos', '1990-07-15', 'Rua B, 20'),
+(3, 'Carlos Lima', '1988-03-22', 'Rua C, 30'),
+(4, 'Ana Pereira', '1992-02-20', 'Rua D, 40'),
+(5, 'Bruno Costa', '1987-11-05', 'Rua E, 50'),
+(6, 'Carla Rocha', '1995-08-30', 'Rua F, 60'),
+(7, 'Fabio Souza', '1983-01-05', 'Rua G, 70'),
+(8, 'Gabriela Alves', '1991-09-10', 'Rua H, 80'),
+(9, 'Helena Martins', '1987-12-20', 'Rua I, 90'),
+(10, 'Igor Campos', '1986-06-25', 'Rua J, 100');
 
 -- CARGO
-INSERT INTO CARGO (nome_cargo) VALUES
+INSERT INTO CARGO (nome) VALUES
 ('Vendedor'), ('Gerente'), ('Caixa');
 
 -- FUNCIONARIO
-INSERT INTO FUNCIONARIO (
-    id_pessoa, nome_func, email_func, senha_func, endereco_func,
-    telefone_func, data_nascimento, salario, carga_horaria, id_cargo
-) VALUES
-(1, 'João Silva', 'joao@empresa.com', 'senha123', 'Rua A, 10', '99990001', '1985-05-10', 3000.00, 44.0, 1),
-(2, 'Maria Santos', 'maria@empresa.com', 'senha456', 'Rua B, 20', '99990002', '1990-07-15', 4000.00, 40.0, 2),
-(3, 'Carlos Lima', 'carlos@empresa.com', 'senha789', 'Rua C, 30', '99990003', '1988-03-22', 2500.00, 36.0, 1),
-(7, 'Fabio Souza', 'fabio@empresa.com', 'senha321', 'Rua G, 70', '99990004', '1983-01-05', 3500.00, 42.0, 2),
-(8, 'Gabriela Alves', 'gabriela@empresa.com', 'senha654', 'Rua H, 80', '99990005', '1991-09-10', 3200.00, 40.0, 1),
-(9, 'Helena Martins', 'helena@empresa.com', 'senha987', 'Rua I, 90', '99990006', '1987-12-20', 3100.00, 38.0, 1),
-(10, 'Igor Campos', 'igor@empresa.com', 'senha159', 'Rua J, 100', '99990007', '1986-06-25', 3600.00, 44.0, 3);
+INSERT INTO FUNCIONARIO (id_pessoa, email, senha, telefone, salario, carga_horaria, id_cargo) VALUES
+(1, 'joao@empresa.com', 'senha123', '99990001', 3000.00, 44.0, 1),
+(2, 'maria@empresa.com', 'senha456', '99990002', 4000.00, 40.0, 2),
+(3, 'carlos@empresa.com', 'senha789', '99990003', 2500.00, 36.0, 1),
+(7, 'fabio@empresa.com', 'senha321', '99990004', 3500.00, 42.0, 2),
+(8, 'gabriela@empresa.com', 'senha654', '99990005', 3200.00, 40.0, 1),
+(9, 'helena@empresa.com', 'senha987', '99990006', 3100.00, 38.0, 1),
+(10, 'igor@empresa.com', 'senha159', '99990007', 3600.00, 44.0, 3);
 
 -- GERENTE
-INSERT INTO GERENTE (id_pessoa) VALUES
-(2), (7);
+INSERT INTO GERENTE (id_pessoa) VALUES (2), (7);
 
 -- CLIENTE
-INSERT INTO CLIENTE (
-    id_pessoa, nome_cliente, email_cliente, senha_cliente, endereco_cliente,
-    telefone_cliente, data_nascimento, renda_cliente, data_cadastro
-) VALUES
-(4, 'Ana Pereira', 'ana@cliente.com', 'senha111', 'Rua D, 40', '88880001', '1992-02-20', 5000.00, '2025-10-10'),
-(5, 'Bruno Costa', 'bruno@cliente.com', 'senha222', 'Rua E, 50', '88880002', '1987-11-05', 7000.00, '2025-10-11'),
-(6, 'Carla Rocha', 'carla@cliente.com', 'senha333', 'Rua F, 60', '88880003', '1995-08-30', 3000.00, '2025-10-12');
-
--- FORMA_PAGAMENTO
-INSERT INTO FORMA_PAGAMENTO (nome_forma_pagamento) VALUES
-('Cartão de Crédito'),
-('Boleto Bancário'),
-('Pix'),
-('Dinheiro');
+INSERT INTO CLIENTE (id_pessoa, email, senha, telefone, renda, data_cadastro) VALUES
+(4, 'ana@cliente.com', 'senha111', '88880001', 5000.00, '2025-10-10'),
+(5, 'bruno@cliente.com', 'senha222', '88880002', 7000.00, '2025-10-11'),
+(6, 'carla@cliente.com', 'senha333', '88880003', 3000.00, '2025-10-12');
 
 -- PRODUTO
 INSERT INTO PRODUTO (id_produto, nome, preco, id_funcionario) VALUES
@@ -195,18 +190,24 @@ INSERT INTO CARRINHO (id_funcionario, data_pedido, id_pessoa) VALUES
 (1, '2025-10-13', 4),
 (2, '2025-10-14', 5);
 
--- ITEM_CARRINHO
 INSERT INTO ITEM_CARRINHO (id_carrinho, id_produto, quantidade, preco_unitario) VALUES
 (1, 1, 2, 79.90),
 (1, 3, 1, 49.90),
 (2, 2, 1, 129.90);
 
 -- PAGAMENTO
-INSERT INTO PAGAMENTO (id_carrinho, valor_total, data_pagamento) VALUES
-(1, 209.70, '2025-10-13 14:30:00'),
-(2, 129.90, '2025-10-14 10:15:00');
+INSERT INTO PAGAMENTO (id_carrinho, data_pagamento, valor_total) VALUES
+(1, '2025-10-13 14:30:00', 209.70),
+(2, '2025-10-14 10:15:00', 129.90);
+
+-- FORMA_PAGAMENTO
+INSERT INTO FORMA_PAGAMENTO (nome) VALUES
+('Cartão de Crédito'),
+('Boleto Bancário'),
+('Pix'),
+('Dinheiro');
 
 -- PAGAMENTO_HAS_FORMA_PAGAMENTO
 INSERT INTO PAGAMENTO_HAS_FORMA_PAGAMENTO (id_pagamento, id_forma_pagamento, valor_pago) VALUES
 (1, 1, 209.70),  -- Pagamento 1 com Cartão de Crédito
-(2, 2, 129.90);  -- Pagamento 2 com Boleto Bancário
+(2, 2, 129.90);

@@ -117,6 +117,15 @@ exports.obterFuncionario = async (req, res) => {
       [id_pessoa]
     );
 
+    const clienteCheck = await query(
+      `SELECT * FROM CLIENTE WHERE id_pessoa = $1`,
+      [id_pessoa]
+    );
+    
+    if (clienteCheck.rows.length > 0) {
+      return res.status(400).json({ error: 'Essa pessoa já é um cliente. Não pode ser registrada como funcionário.' });
+    }
+
     if (result.rows.length === 0) return res.status(404).json({ error: 'Funcionário não encontrado' });
 
     res.json(result.rows[0]);
