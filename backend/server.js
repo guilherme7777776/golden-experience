@@ -78,17 +78,14 @@ app.use('/menu', menuRoutes);
 const pessoaRoutes = require('./routes/pessoaRoutes');
 app.use('/pessoa', pessoaRoutes);
 
-const funcionarioRoutes = require('./routes/funcionarioRoutes');
-app.use('/funcionario', funcionarioRoutes);
-
 const produtoRoutes = require('./routes/produtoRoutes');
 app.use('/produto', produtoRoutes);
 
 const pedidoRoutes = require('./routes/pedidoRoutes');
 app.use('/pedido', pedidoRoutes);
 
-const itemCarrinhoRoutes = require('./routes/item_carrinhoRoutes');
-app.use('/item_carrinho', itemCarrinhoRoutes);
+const item_pedidoRoutes = require('./routes/item_pedidoRoutes');
+app.use('/item_pedido', item_pedidoRoutes);
 
 
 

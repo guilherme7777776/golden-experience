@@ -11,7 +11,7 @@ exports.abrirCrudPedido = (req, res) => {
 
 exports.listarPedidos = async (req, res) => {
   try {
-    const result = await query('SELECT * FROM C ORDER BY carrinho');
+    const result = await query('SELECT * FROM P ORDER PEDIDO');
     //  console.log('Resultado do SELECT:', result.rows);//verifica se está retornando algo
     res.json(result.rows);
   } catch (error) {
@@ -22,15 +22,15 @@ exports.listarPedidos = async (req, res) => {
 
 exports.criarPedido = async (req, res) => {
   try {
-    const { id_carrinho, data_pedido, id_pessoa, id_funcionario} = req.body;
+    const { id_pedido, data_pedido, id_pessoa, id_funcionario} = req.body;
 
     if (!carrinho || !data_pedido || !id_pessoa || !id_funcionario) {
-      return res.status(400).json({ error: 'Todos os campos são obrigatórios: id_carrinho, data_pedido, id_pessoa, id_funcionario.' });
+      return res.status(400).json({ error: 'Todos os campos são obrigatórios: id_pedido, data_pedido, id_pessoa, id_funcionario.' });
     }
 
     const result = await query(
-      'INSERT INTO CARRINHO (id_carrinho, data_pedido, id_pessoa, id_funcionario) VALUES ($1, $2, $3, $4) RETURNING *',
-      [carrinho, data_pedido, id_pessoa, id_funcionario]
+      'INSERT INTO CARRINHO (id_pedido, data_pedido, id_pessoa, id_funcionario) VALUES ($1, $2, $3, $4) RETURNING *',
+      [id_pedido, data_pedido, id_pessoa, id_funcionario]
     );
 
     res.status(201).json(result.rows[0]);
@@ -64,7 +64,7 @@ exports.obterPedido = async (req, res) => {
     }
 
     const result = await query(
-      'SELECT * FROM CARRINHO WHERE carrinho = $1',
+      'SELECT * FROM PEDIDO WHERE id_pedido = $1',
       [id]
     );
 
@@ -87,18 +87,18 @@ exports.atualizarPedido = async (req, res) => {
     const { data_pedido, id_pessoa, id_funcionario } = req.body;
 
     // Verifica se o pedido existe
-    const existing = await query('SELECT * FROM pedido WHERE carrinho = $1', [id]);
+    const existing = await query('SELECT * FROM PEDIDO WHERE id_pedido = $1', [id]);
     if (existing.rows.length === 0) {
       return res.status(404).json({ error: 'Pedido não encontrado' });
     }
 
     // Atualiza o pedido
     const sql = `
-      UPDATE pedido
+      UPDATE PEDIDO
       SET data_pedido = $1,
           id_pessoa = $2,
           id_funcionario = $3
-      WHERE carrinho = $4
+      WHERE id_pedido = $4
       RETURNING *
     `;
     const values = [data_pedido, id_pessoa, id_funcionario, id];
@@ -118,7 +118,7 @@ exports.deletarPedido = async (req, res) => {
 
     // Verifica se o pedido existe
     const existingPersonResult = await query(
-      'SELECT * FROM pedido WHERE carrinho = $1',
+      'SELECT * FROM PEDIDO WHERE id_pedido = $1',
       [id]
     );
 
@@ -128,7 +128,7 @@ exports.deletarPedido = async (req, res) => {
 
     // Deleta o pedido (constraints CASCADE cuidam das dependências)
     await query(
-      'DELETE FROM pedido WHERE carrinho = $1',
+      'DELETE FROM PEDIDO WHERE id_pedido = $1',
       [id]
     );
 

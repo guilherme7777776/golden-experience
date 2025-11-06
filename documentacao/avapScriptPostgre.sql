@@ -103,12 +103,12 @@ CREATE TABLE PEDIDO (
 -- ALTERADO DE ITEM_CARRINHO PARA ITEM_PEDIDO
 CREATE TABLE ITEM_PEDIDO (
     id_item SERIAL PRIMARY KEY,
-    id_pedido INT NOT NULL,
-    id_produto INT NOT NULL,
+    pedido_id_pedido INT NOT NULL,
+    produto_id_produto INT NOT NULL,
     quantidade INT NOT NULL CHECK (quantidade > 0),
     preco_unitario DECIMAL(10,2) NOT NULL CHECK (preco_unitario >= 0),
-    FOREIGN KEY (id_pedido) REFERENCES PEDIDO(id_pedido) ON DELETE CASCADE,
-    FOREIGN KEY (id_produto) REFERENCES PRODUTO(id_produto) ON DELETE CASCADE
+    FOREIGN KEY (pedido_id_pedido) REFERENCES PEDIDO(id_pedido) ON DELETE CASCADE,
+    FOREIGN KEY (produto_id_produto) REFERENCES PRODUTO(id_produto) ON DELETE CASCADE
 );
 
 CREATE TABLE FORMA_PAGAMENTO (
@@ -171,41 +171,96 @@ INSERT INTO CLIENTE (
 (5, 'Bruno Costa', 'bruno@cliente.com', 'senha222', 'Rua E, 50', '88880002', '1987-11-05', 7000.00, '2025-10-11'),
 (6, 'Carla Rocha', 'carla@cliente.com', 'senha333', 'Rua F, 60', '88880003', '1995-08-30', 3000.00, '2025-10-12');
 
--- PRODUTO
+-- PRODUTOS
 INSERT INTO PRODUTO (id_produto, nome, preco, id_funcionario) VALUES
-(1, 'Camiseta Rock', 79.90, 1),
-(2, 'Vinil Metallica', 129.90, 2),
-(3, 'CD Angra', 49.90, 1);
+(1, 'Camiseta Iron Maiden - The Trooper', 89.90, 1),
+(2, 'Vinil Metallica - Master of Puppets', 149.90, 2),
+(3, 'CD Angra - Rebirth', 54.90, 1),
+(4, 'Camiseta Pink Floyd - Dark Side of the Moon', 99.90, 2),
+(5, 'Vinil Queen - A Night at the Opera', 159.90, 3),
+(6, 'CD Dream Theater - Images and Words', 59.90, 1),
+(7, 'Camiseta Led Zeppelin - IV', 84.90, 2),
+(8, 'Vinil Nirvana - Nevermind', 139.90, 3),
+(9, 'CD Rush - Moving Pictures', 49.90, 1),
+(10, 'Camiseta AC/DC - Back in Black', 89.90, 2);
 
--- CAMISETA
+-- CAMISETAS
 INSERT INTO CAMISETA (id_produto, tamanho, cor) VALUES
-(1, 'M', 'Preto');
+(1, 'M', 'Preto'),
+(4, 'G', 'Preto'),
+(7, 'M', 'Branco'),
+(10, 'G', 'Preto');
 
--- VINIL
+-- VINIS
 INSERT INTO VINIL (id_produto, ano_lancamento) VALUES
-(2, 1986);
+(2, 1986),
+(5, 1975),
+(8, 1991);
 
--- CD
+-- CDS
 INSERT INTO CD (id_produto, duracao_minutos) VALUES
-(3, 75);
+(3, 61),
+(6, 57),
+(9, 44);
 
--- PEDIDO (antes CARRINHO)
+-- PEDIDOS (somente clientes 4, 5 e 6)
 INSERT INTO PEDIDO (id_funcionario, data_pedido, id_pessoa) VALUES
-(1, '2025-10-13', 4),
-(2, '2025-10-14', 5);
+(1, '2025-10-13', 4),  -- Ana Pereira atendida por João
+(2, '2025-10-14', 5),  -- Bruno Costa atendido por Maria
+(3, '2025-10-15', 6),  -- Carla Rocha atendida por Carlos
+(7, '2025-10-16', 4),  -- Ana faz outro pedido com Fabio
+(8, '2025-10-17', 5),  -- Bruno faz outro pedido com Gabriela
+(9, '2025-10-18', 6),  -- Carla faz outro pedido com Helena
+(10, '2025-10-19', 4), -- Ana faz outro pedido com Igor
+(2, '2025-10-20', 5);  -- Bruno faz mais um com Maria
 
--- ITEM_PEDIDO (antes ITEM_CARRINHO)
-INSERT INTO ITEM_PEDIDO (id_pedido, id_produto, quantidade, preco_unitario) VALUES
-(1, 1, 2, 79.90),
-(1, 3, 1, 49.90),
-(2, 2, 1, 129.90);
+-- ITENS DOS PEDIDOS
+INSERT INTO ITEM_PEDIDO (pedido_id_pedido, produto_id_produto, quantidade, preco_unitario) VALUES
+-- Pedido 1 (Ana)
+(1, 1, 1, 89.90),
+(1, 3, 1, 54.90),
 
--- PAGAMENTO (referencia agora PEDIDO)
+-- Pedido 2 (Bruno)
+(2, 2, 1, 149.90),
+(2, 4, 1, 99.90),
+
+-- Pedido 3 (Carla)
+(3, 5, 1, 159.90),
+(3, 6, 1, 59.90),
+
+-- Pedido 4 (Ana)
+(4, 7, 1, 84.90),
+(4, 8, 1, 139.90),
+
+-- Pedido 5 (Bruno)
+(5, 9, 1, 49.90),
+(5, 10, 1, 89.90),
+
+-- Pedido 6 (Carla)
+(6, 3, 1, 54.90),
+(6, 4, 1, 99.90),
+(6, 2, 1, 149.90),
+
+-- Pedido 7 (Ana)
+(7, 1, 2, 89.90),
+(7, 5, 1, 159.90),
+
+-- Pedido 8 (Bruno)
+(8, 8, 1, 139.90),
+(8, 10, 1, 89.90);
+
+-- PAGAMENTOS
 INSERT INTO PAGAMENTO (id_pedido, data_pagamento, valor_total) VALUES
-(1, '2025-10-13 14:30:00', 209.70),
-(2, '2025-10-14 10:15:00', 129.90);
+(1, '2025-10-13 14:30:00', 144.80),
+(2, '2025-10-14 10:15:00', 249.80),
+(3, '2025-10-15 12:50:00', 218.80),
+(4, '2025-10-16 13:45:00', 224.80),
+(5, '2025-10-17 09:25:00', 139.80),
+(6, '2025-10-18 15:40:00', 303.70),
+(7, '2025-10-19 18:10:00', 339.70),
+(8, '2025-10-20 20:05:00', 228.80);
 
--- FORMA_PAGAMENTO
+-- FORMAS DE PAGAMENTO
 INSERT INTO FORMA_PAGAMENTO (nome_forma_pagamento) VALUES
 ('Cartão de Crédito'),
 ('Boleto Bancário'),
@@ -214,6 +269,17 @@ INSERT INTO FORMA_PAGAMENTO (nome_forma_pagamento) VALUES
 
 -- PAGAMENTO_HAS_FORMA_PAGAMENTO
 INSERT INTO PAGAMENTO_HAS_FORMA_PAGAMENTO (id_pagamento, id_forma_pagamento, valor_pago) VALUES
-(1, 1, 209.70),  -- Pagamento 1 com Cartão de Crédito
-(2, 2, 129.90);  -- Pagamento 2 com Boleto
+(1, 1, 144.80),  -- Cartão
+(2, 3, 249.80),  -- Pix
+(3, 2, 218.80),  -- Boleto
+(4, 4, 224.80),  -- Dinheiro
+(5, 1, 139.80),  -- Cartão
+(6, 3, 303.70),  -- Pix
+(7, 1, 339.70),  -- Cartão
+(8, 4, 228.80);  -- Dinheiro
+
+SELECT IP.pedido_id_pedido , IP.produto_id_produto , nome , IP.quantidade , IP.preco_unitario 
+FROM ITEM_PEDIDO IP, PRODUTO P  
+WHERE IP.pedido_id_pedido = 2 and  IP.produto_id_produto = P.id_produto 
+ORDER BY IP.produto_id_produto;
 

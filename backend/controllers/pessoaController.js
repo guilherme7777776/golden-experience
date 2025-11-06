@@ -1,7 +1,6 @@
 const { query } = require('../database');
 const path = require('path');
 
-console.log("VEJA A REPETIÇÃO DO RENDERIZAR TABELA PRODUTO")
 // ========================
 // ABRIR PÁGINA CRUD
 // ========================
@@ -10,113 +9,35 @@ exports.abrirCrudPessoa = (req, res) => {
 };
 
 // ========================
-// LISTAR TODAS AS PESSOAS (CLIENTES)
+// LISTAR TODAS AS PESSOAS
 // ========================
 exports.listarPessoas = async (req, res) => {
   try {
     const result = await query(`
-     SELECT
-      p.id_pessoa,
-      CASE
-          WHEN c.id_pessoa IS NOT NULL THEN c.nome_cliente
-          ELSE f.nome_func
-      END AS nome_pessoa,
-      CASE
-          WHEN c.id_pessoa IS NOT NULL THEN c.email_cliente
-          ELSE NULL
-      END AS email_pessoa,
-      CASE
-          WHEN c.id_pessoa IS NOT NULL THEN c.senha_cliente
-          ELSE NULL
-      END AS senha_pessoa,
-      CASE
-          WHEN c.id_pessoa IS NOT NULL THEN c.endereco_cliente
-          ELSE NULL
-      END AS endereco_pessoa,
-      CASE
-          WHEN c.id_pessoa IS NOT NULL THEN c.telefone_cliente
-          ELSE NULL
-      END AS telefone_pessoa,
-      CASE
-          WHEN c.id_pessoa IS NOT NULL THEN c.data_nascimento
-          ELSE NULL
-      END AS data_nascimento
-    FROM PESSOA p
-    LEFT JOIN CLIENTE c ON p.id_pessoa = c.id_pessoa
-    LEFT JOIN FUNCIONARIO f ON p.id_pessoa = f.id_pessoa
-    ORDER BY p.id_pessoa;
-
+      SELECT 
+        P.ID_PESSOA,
+        COALESCE(C.NOME_CLIENTE, F.NOME_FUNC) AS NOME_PESSOA,
+        COALESCE(C.EMAIL_CLIENTE, F.EMAIL_FUNC) AS EMAIL_PESSOA,
+        COALESCE(C.SENHA_CLIENTE, F.SENHA_FUNC) AS SENHA_PESSOA,
+        COALESCE(C.ENDERECO_CLIENTE, F.ENDERECO_FUNC) AS ENDERECO_PESSOA,
+        COALESCE(C.TELEFONE_CLIENTE, F.TELEFONE_FUNC) AS TELEFONE_PESSOA,
+        COALESCE(C.DATA_NASCIMENTO, F.DATA_NASCIMENTO) AS DATA_NASCIMENTO,
+        CASE 
+          WHEN C.ID_PESSOA IS NOT NULL THEN 'CLIENTE'
+          WHEN F.ID_PESSOA IS NOT NULL THEN 'FUNCIONARIO'
+        END AS TIPO
+      FROM PESSOA P
+      LEFT JOIN CLIENTE C ON P.ID_PESSOA = C.ID_PESSOA
+      LEFT JOIN FUNCIONARIO F ON P.ID_PESSOA = F.ID_PESSOA
+      ORDER BY P.ID_PESSOA;
     `);
-    
+
     res.json(result.rows);
-    console.log(result)
   } catch (error) {
     console.error('Erro ao listar pessoas:', error);
-    res.status(500).json({ error: 'Erro interno do servidor1' });
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
-
-// ========================
-// CRIAR NOVA PESSOA (CLIENTE)
-// ========================
-exports.criarPessoa = async (req, res) => {
-  try {
-    const {
-      id_pessoa,
-      nome_pessoa,
-      email_pessoa,
-      senha_pessoa,
-      endereco_pessoa,
-      telefone_pessoa,
-      data_nascimento
-    } = req.body;
-
-    // Validação básica
-    if (!nome_pessoa || !email_pessoa || !senha_pessoa || !data_nascimento) {
-      return res.status(400).json({ error: 'Campos obrigatórios não fornecidos' });
-    }
-    console.log(id_pessoa)
-    // Validação de ID como inteiro
-
-    const idInt = parseInt(id_pessoa);
-    if (isNaN(idInt)) {
-      return res.status(400).json({ error: 'id_pessoa deve ser um número inteiro válido' });
-    }
-    console.log(idInt)
-  
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email_pessoa)) {
-      return res.status(400).json({ error: 'Formato de email inválido' });
-    }
-
-  
-    if (senha_pessoa.length < 8) {
-      return res.status(400).json({ error: 'Senha deve ter pelo menos 8 caracteres' });
-    }
-   
-    await query('INSERT INTO PESSOA (id_pessoa) VALUES ($1)', [idInt]);
-
-   
-    const result = await query(
-      `INSERT INTO CLIENTE (
-          id_pessoa, nome_cliente, email_cliente, senha_cliente, endereco_cliente, telefone_cliente, data_nascimento
-        )
-        VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [idInt, nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento]
-    );
-
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    console.error('Erro ao criar pessoa:', error);
-
-    if (error.code === '23505') {
-      return res.status(400).json({ error: 'id_pessoa ou email já estão em uso' });
-    }
-
-    res.status(500).json({ error: 'Erro interno do servidor2' });
-  }
-};
-
 
 // ========================
 // OBTER PESSOA POR ID
@@ -124,86 +45,125 @@ exports.criarPessoa = async (req, res) => {
 exports.obterPessoa = async (req, res) => {
   try {
     const id_pessoa = parseInt(req.params.id);
-    if (isNaN(id_pessoa)) {
-      return res.status(400).json({ error: 'id_pessoa deve ser um número válido' });
-    }
+    if (isNaN(id_pessoa)) return res.status(400).json({ error: 'id_pessoa inválido' });
 
-    const result = await query(
-      `SELECT 
-         p.id_pessoa,
-         c.nome_cliente AS nome_pessoa,
-         c.email_cliente AS email_pessoa,
-         c.senha_cliente AS senha_pessoa,
-         c.endereco_cliente AS endereco_pessoa,
-         c.telefone_cliente AS telefone_pessoa,
-         c.data_nascimento
-       FROM cliente c
-       JOIN pessoa p ON c.id_pessoa = p.id_pessoa
-       WHERE p.id_pessoa = $1`,
-      [id_pessoa]
-    );
+    const result = await query(`
+      SELECT 
+        P.ID_PESSOA,
+        COALESCE(C.NOME_CLIENTE, F.NOME_FUNC) AS NOME_PESSOA,
+        COALESCE(C.EMAIL_CLIENTE, F.EMAIL_FUNC) AS EMAIL_PESSOA,
+        COALESCE(C.SENHA_CLIENTE, F.SENHA_FUNC) AS SENHA_PESSOA,
+        COALESCE(C.ENDERECO_CLIENTE, F.ENDERECO_FUNC) AS ENDERECO_PESSOA,
+        COALESCE(C.TELEFONE_CLIENTE, F.TELEFONE_FUNC) AS TELEFONE_PESSOA,
+        COALESCE(C.DATA_NASCIMENTO, F.DATA_NASCIMENTO) AS DATA_NASCIMENTO,
+        CASE 
+          WHEN C.ID_PESSOA IS NOT NULL THEN 'CLIENTE'
+          WHEN F.ID_PESSOA IS NOT NULL THEN 'FUNCIONARIO'
+        END AS TIPO
+      FROM PESSOA P
+      LEFT JOIN CLIENTE C ON P.ID_PESSOA = C.ID_PESSOA
+      LEFT JOIN FUNCIONARIO F ON P.ID_PESSOA = F.ID_PESSOA
+      WHERE P.ID_PESSOA = $1;
+    `, [id_pessoa]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Pessoa não encontrada' });
-    }
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Pessoa não encontrada' });
 
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Erro ao obter pessoa:', error);
-    res.status(500).json({ error: 'Erro interno do servidor3' });
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
-// ========================
-// ATUALIZAR PESSOA
-// ========================
-exports.atualizarPessoa = async (req, res) => {
+/// CRIAR NOVA PESSOA
+exports.criarPessoa = async (req, res) => {
   try {
-    const id_pessoa = parseInt(req.params.id);
     const {
+      id_pessoa,
+      tipo,
       nome_pessoa,
       email_pessoa,
       senha_pessoa,
       endereco_pessoa,
       telefone_pessoa,
-      data_nascimento
+      data_nascimento,
+      // Campos específicos
+      renda_cliente,
+      data_cadastro,
+      salario,
+      carga_horaria,
+      id_cargo
     } = req.body;
 
-    if (isNaN(id_pessoa)) {
-      return res.status(400).json({ error: 'id_pessoa inválido' });
+    if (!nome_pessoa || !email_pessoa || !senha_pessoa || !tipo) {
+      return res.status(400).json({ error: 'Campos obrigatórios não fornecidos' });
     }
 
-    const existing = await query(`SELECT * FROM PESSOA WHERE id_pessoa = $1`, [id_pessoa]);
-    if (existing.rows.length === 0) {
-      return res.status(404).json({ error: 'Pessoa não encontrada' });
+    await query('INSERT INTO PESSOA (ID_PESSOA) VALUES ($1)', [parseInt(id_pessoa)]);
+
+    if (tipo === 'CLIENTE') {
+      const result = await query(
+        `INSERT INTO CLIENTE (
+          ID_PESSOA, NOME_CLIENTE, EMAIL_CLIENTE, SENHA_CLIENTE, ENDERECO_CLIENTE, TELEFONE_CLIENTE, DATA_NASCIMENTO, RENDA_CLIENTE, DATA_CADASTRO
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+        [id_pessoa, nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento, renda_cliente, data_cadastro]
+      );
+      return res.status(201).json(result.rows[0]);
+    } else if (tipo === 'FUNCIONARIO') {
+      const result = await query(
+        `INSERT INTO FUNCIONARIO (
+          ID_PESSOA, NOME_FUNC, EMAIL_FUNC, SENHA_FUNC, ENDERECO_FUNC, TELEFONE_FUNC, DATA_NASCIMENTO, SALARIO, CARGA_HORARIA, ID_CARGO
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+        [id_pessoa, nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento, salario, carga_horaria, id_cargo]
+      );
+      return res.status(201).json(result.rows[0]);
     }
+  } catch (error) {
+    console.error('Erro ao criar pessoa:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+};
 
-    const person = existing.rows[0];
+// ATUALIZAR PESSOA
+exports.atualizarPessoa = async (req, res) => {
+  try {
+    const id_pessoa = parseInt(req.params.id);
+    const {
+      tipo,
+      nome_pessoa,
+      email_pessoa,
+      senha_pessoa,
+      endereco_pessoa,
+      telefone_pessoa,
+      data_nascimento,
+      // Campos específicos
+      renda_cliente,
+      data_cadastro,
+      salario,
+      carga_horaria,
+      id_cargo
+    } = req.body;
 
-    const updated = {
-      nome_pessoa: nome_pessoa ?? person.nome_pessoa,
-      email_pessoa: email_pessoa ?? person.email_pessoa,
-      senha_pessoa: senha_pessoa ?? person.senha_pessoa,
-      endereco_pessoa: endereco_pessoa ?? person.endereco_pessoa,
-      telefone_pessoa: telefone_pessoa ?? person.telefone_pessoa,
-      data_nascimento: data_nascimento ?? person.data_nascimento
-    };
-
-    const result = await query(
-      `UPDATE CLIENTE SET 
-        nome_cliente = $1, email_cliente = $2, senha_cliente = $3, 
-        endereco_cliente = $4, telefone_cliente = $5, data_nascimento = $6
-       WHERE id_pessoa = $7 RETURNING *`,
-      [updated.nome_pessoa, updated.email_pessoa, updated.senha_pessoa, updated.endereco_pessoa, updated.telefone_pessoa, updated.data_nascimento, id_pessoa]
-    );
-
-    res.json(result.rows[0]);
+    if (tipo === 'CLIENTE') {
+      const result = await query(
+        `UPDATE CLIENTE SET 
+          NOME_CLIENTE=$1, EMAIL_CLIENTE=$2, SENHA_CLIENTE=$3, ENDERECO_CLIENTE=$4, TELEFONE_CLIENTE=$5, DATA_NASCIMENTO=$6, RENDA_CLIENTE=$7, DATA_CADASTRO=$8
+         WHERE ID_PESSOA=$9 RETURNING *`,
+        [nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento, renda_cliente, data_cadastro, id_pessoa]
+      );
+      return res.json(result.rows[0]);
+    } else if (tipo === 'FUNCIONARIO') {
+      const result = await query(
+        `UPDATE FUNCIONARIO SET 
+          NOME_FUNC=$1, EMAIL_FUNC=$2, SENHA_FUNC=$3, ENDERECO_FUNC=$4, TELEFONE_FUNC=$5, DATA_NASCIMENTO=$6, SALARIO=$7, CARGA_HORARIA=$8, ID_CARGO=$9
+         WHERE ID_PESSOA=$10 RETURNING *`,
+        [nome_pessoa, email_pessoa, senha_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento, salario, carga_horaria, id_cargo, id_pessoa]
+      );
+      return res.json(result.rows[0]);
+    }
   } catch (error) {
     console.error('Erro ao atualizar pessoa:', error);
-    if (error.code === '23505') {
-      return res.status(400).json({ error: 'Email já em uso' });
-    }
-    res.status(500).json({ error: 'Erro interno do servidor4' });
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
@@ -215,45 +175,13 @@ exports.deletarPessoa = async (req, res) => {
     const id_pessoa = parseInt(req.params.id);
     if (isNaN(id_pessoa)) return res.status(400).json({ error: 'id_pessoa inválido' });
 
-    const existing = await query(`SELECT * FROM PESSOA WHERE id_pessoa = $1`, [id_pessoa]);
-    if (existing.rows.length === 0) return res.status(404).json({ error: 'Pessoa não encontrada' });
+    await query(`DELETE FROM CLIENTE WHERE ID_PESSOA=$1`, [id_pessoa]);
+    await query(`DELETE FROM FUNCIONARIO WHERE ID_PESSOA=$1`, [id_pessoa]);
+    await query(`DELETE FROM PESSOA WHERE ID_PESSOA=$1`, [id_pessoa]);
 
-    await query(`DELETE FROM PESSOA WHERE id_pessoa = $1`, [id_pessoa]);
-    await query(`DELETE FROM CLIENTE WHERE id_pessoa = $1`, [id_pessoa]);
     res.status(204).send();
   } catch (error) {
     console.error('Erro ao deletar pessoa:', error);
-    res.status(500).json({ error: 'Erro interno do servidor5' });
-  }
-};
-
-// ========================
-// ATUALIZAR SENHA
-// ========================
-exports.atualizarSenha = async (req, res) => {
-  try {
-    const id_pessoa = parseInt(req.params.id);
-    const { senha_atual, nova_senha } = req.body;
-
-    if (isNaN(id_pessoa)) return res.status(400).json({ error: 'id_pessoa inválido' });
-    if (!senha_atual || !nova_senha) return res.status(400).json({ error: 'Senha atual e nova são obrigatórias' });
-
-    const result = await query(`SELECT * FROM PESSOA WHERE id_pessoa = $1`, [id_pessoa]);
-    if (result.rows.length === 0)
-      return res.status(404).json({ error: 'Pessoa não encontrada' 
-    });
-
-    const person = result.rows[0];
-    if (person.senha_pessoa !== senha_atual) return res.status(400).json({ error: 'Senha atual incorreta' });
-
-    const updateResult = await query(
-      `UPDATE PESSOA SET senha_pessoa = $1 WHERE id_pessoa = $2 RETURNING id_pessoa, nome_pessoa, email_pessoa, endereco_pessoa, telefone_pessoa, data_nascimento`,
-      [nova_senha, id_pessoa]
-    );
-
-    res.json(updateResult.rows[0]);
-  } catch (error) {
-    console.error('Erro ao atualizar senha:', error);
-    res.status(500).json({ error: 'Erro interno do servidor6' });
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };

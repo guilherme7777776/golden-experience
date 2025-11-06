@@ -6,6 +6,7 @@ let operacao = null;
 // Elementos do DOM
 const form = document.getElementById('pessoaForm');
 const searchId = document.getElementById('searchId');
+const tipoPessoaSelect = document.getElementById('tipo_pessoa');
 const btnBuscar = document.getElementById('btnBuscar');
 const btnIncluir = document.getElementById('btnIncluir');
 const btnAlterar = document.getElementById('btnAlterar');
@@ -20,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarPessoas();
     mostrarBotoes(true, false, false, false, false, false);
     bloquearCampos(false);
+
+    // Mostrar checkboxes sempre
+    document.querySelectorAll('.cliente, .funcionario').forEach(el => el.style.display = 'block');
 });
 
 // Event Listeners
@@ -37,13 +41,13 @@ function mostrarMensagem(texto, tipo = 'info') {
 }
 
 // Bloquear ou liberar campos do formulário
-function bloquearCampos(bloquearId) {
-    const inputs = form.querySelectorAll('input');
-    inputs.forEach((input, index) => {
+function bloquearCampos(bloquear) {
+    const inputs = form.querySelectorAll('input, select');
+    inputs.forEach(input => {
         if (input.id === 'id_pessoa' || input.id === 'searchId') {
-            input.disabled = bloquearId;
+            input.disabled = bloquear;
         } else {
-            input.disabled = !bloquearId;
+            input.disabled = !bloquear;
         }
     });
 }
@@ -54,7 +58,7 @@ function limparFormulario() {
     currentPersonId = null;
 }
 
-// Mostrar ou esconder botões conforme parâmetros (true = mostrar)
+// Mostrar ou esconder botões conforme parâmetros
 function mostrarBotoes(buscar, incluir, alterar, excluir, salvar, cancelar) {
     btnBuscar.style.display = buscar ? 'inline-block' : 'none';
     btnIncluir.style.display = incluir ? 'inline-block' : 'none';
@@ -83,23 +87,9 @@ async function buscarPessoa() {
         } else if (response.status === 404) {
             limparFormulario();
             searchId.value = id;
-
-            // tenta pegar a resposta JSON (caso o backend retorne info extra)
-            let data;
-            try {
-                data = await response.json();
-            } catch {
-                data = null;
-            }
-            console.log("data:",data)
             mostrarBotoes(true, true, false, false, false, false);
             bloquearCampos(false);
-
-            if (data && data.is_funcionario) {
-                mostrarMensagem('Essa pessoa é um funcionário e não pode ser cadastrada como cliente.', 'warning');
-            } else {
-                mostrarMensagem('Pessoa não encontrada. Você pode incluir uma nova pessoa.', 'info');
-            }
+            mostrarMensagem('Pessoa não encontrada. Você pode incluir uma nova pessoa.', 'info');
         } else {
             throw new Error('Erro ao buscar pessoa');
         }
@@ -124,6 +114,17 @@ function preencherFormulario(pessoa) {
     } else {
         document.getElementById('data_nascimento').value = '';
     }
+
+    // Marcar checkboxes de acordo com o tipo
+    document.getElementById('checkboxCliente').checked = pessoa.tipo_pessoa === 'CLIENTE';
+    document.getElementById('checkboxFuncionario').checked = pessoa.tipo_pessoa === 'FUNCIONARIO';
+
+    // Preencher campos específicos
+    document.getElementById('renda_cliente').value = pessoa.renda_cliente || '';
+    document.getElementById('data_cadastro_cliente').value = pessoa.data_cadastro || '';
+    document.getElementById('salario_funcionario').value = pessoa.salario || '';
+    document.getElementById('porcentagem_comissao_funcionario').value = pessoa.carga_horaria || '';
+    document.getElementById('cargo_id_cargo').value = pessoa.id_cargo || '';
 }
 
 // Iniciar inclusão de nova pessoa
@@ -152,10 +153,15 @@ function excluirPessoa() {
     operacao = 'excluir';
 }
 
-// Salvar operação (incluir, alterar ou excluir)
+// Salvar operação (incluir, alterar, excluir)
 async function salvarOperacao() {
     const formData = new FormData(form);
-    console.log("form:",formData)
+
+    // Determinar tipo com base na checkbox
+    let tipoPessoa = null;
+    if (document.getElementById('checkboxCliente').checked) tipoPessoa = 'CLIENTE';
+    if (document.getElementById('checkboxFuncionario').checked) tipoPessoa = 'FUNCIONARIO';
+
     const pessoa = {
         id_pessoa: document.getElementById('searchId').value,
         nome_pessoa: formData.get('nome_pessoa'),
@@ -164,25 +170,29 @@ async function salvarOperacao() {
         endereco_pessoa: formData.get('endereco_pessoa'),
         telefone_pessoa: formData.get('telefone_pessoa'),
         data_nascimento: formData.get('data_nascimento') || null,
+        tipo_pessoa: tipoPessoa,
+        // Campos de CLIENTE
+        renda_cliente: formData.get('renda_cliente') || null,
+        data_cadastro: formData.get('data_cadastro_cliente') || null,
+        // Campos de FUNCIONARIO
+        salario: formData.get('salario_funcionario') || null,
+        carga_horaria: formData.get('porcentagem_comissao_funcionario') || null,
+        id_cargo: formData.get('cargo_id_cargo') || null
     };
-    console.log("id:",document.getElementById('searchId').value)
-    console.log("pessoa")
-    console.log(pessoa)
+
     try {
         let response;
         if (operacao === 'incluir') {
             response = await fetch(`${API_BASE_URL}/pessoa`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pessoa),
+                body: JSON.stringify(pessoa)
             });
-            console.log(pessoa)
-            console.log("sshjighjewior")
         } else if (operacao === 'alterar') {
             response = await fetch(`${API_BASE_URL}/pessoa/${currentPersonId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pessoa,),
+                body: JSON.stringify(pessoa)
             });
         } else if (operacao === 'excluir') {
             response = await fetch(`${API_BASE_URL}/pessoa/${currentPersonId}`, { method: 'DELETE' });
@@ -205,7 +215,7 @@ async function salvarOperacao() {
     }
 }
 
-// Cancelar operação em andamento
+// Cancelar operação
 function cancelarOperacao() {
     limparFormulario();
     mostrarBotoes(true, false, false, false, false, false);
@@ -214,13 +224,12 @@ function cancelarOperacao() {
     mostrarMensagem('Operação cancelada', 'info');
 }
 
-// Carregar e renderizar lista de pessoas
+// Carregar lista de pessoas
 async function carregarPessoas() {
     try {
         const response = await fetch(`${API_BASE_URL}/pessoa`);
         if (!response.ok) throw new Error('Erro ao carregar pessoas');
         const pessoas = await response.json();
-        
         renderizarTabelaPessoas(pessoas);
     } catch (error) {
         console.error(error);
@@ -228,28 +237,24 @@ async function carregarPessoas() {
     }
 }
 
-// Renderizar tabela com pessoas
+// Renderizar tabela de pessoas
 function renderizarTabelaPessoas(pessoas) {
     pessoasTableBody.innerHTML = '';
 
     pessoas.forEach(pessoa => {
-        let dataFormatada = '';
-        if (pessoa.data_nascimento) {
-            dataFormatada = new Date(pessoa.data_nascimento).toISOString().split('T')[0];
-        }
         const row = document.createElement('tr');
 
-        // Cria o botão do ID
+        const dataFormatada = pessoa.data_nascimento
+            ? new Date(pessoa.data_nascimento).toISOString().split('T')[0]
+            : '';
+
         const idButton = document.createElement('button');
         idButton.textContent = pessoa.id_pessoa;
-        idButton.classList.add('btn-id'); // mantém verde
+        idButton.classList.add('btn-id');
 
-        // Se for funcionário, desativa o botão
-        // Se for funcionário, desativa e pinta de cinza
-        if (pessoa.isfuncionario || pessoa.isFuncionario) {
-            
+        if (pessoa.tipo_pessoa === 'FUNCIONARIO') {
             idButton.style.cursor = 'not-allowed';
-            idButton.style.backgroundColor = 'gray'; // garante cor cinza
+            idButton.style.backgroundColor = 'gray';
             idButton.style.borderColor = 'gray';
             idButton.style.color = 'white';
             idButton.style.opacity = '0.9';
@@ -257,8 +262,6 @@ function renderizarTabelaPessoas(pessoas) {
             idButton.onclick = () => selecionarPessoa(pessoa.id_pessoa);
         }
 
-
-        // Cria células da linha
         const cells = [
             idButton,
             pessoa.nome_pessoa || '',
@@ -266,7 +269,8 @@ function renderizarTabelaPessoas(pessoas) {
             pessoa.senha_pessoa || '',
             pessoa.endereco_pessoa || '',
             pessoa.telefone_pessoa || '',
-            dataFormatada
+            dataFormatada,
+            pessoa.tipo_pessoa || ''
         ];
 
         cells.forEach(cell => {
@@ -280,8 +284,7 @@ function renderizarTabelaPessoas(pessoas) {
     });
 }
 
-
-// Selecionar pessoa da tabela e buscar seus dados
+// Selecionar pessoa da tabela
 async function selecionarPessoa(id) {
     searchId.value = id;
     await buscarPessoa();

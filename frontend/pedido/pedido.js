@@ -122,7 +122,7 @@ async function buscarPedido() {
 async function carregarItensDoPedido(pedidoId) {
     try {
         // debugger;
-        const responseItens = await fetch(`${API_BASE_URL}/pedido_has_produto/${pedidoId}`);
+        const responseItens = await fetch(`${API_BASE_URL}/item_pedido/${pedidoId}`);
 
         if (responseItens.ok) {
             const itensDoPedido = await responseItens.json();
@@ -156,8 +156,8 @@ function preencherFormulario(pedido) {
     searchId.value = pedido.id_pedido;
     document.getElementById('data_pedido').value = formatarDataParaInputDate(pedido.data_pedido);
 
-    document.getElementById('cliente_pessoa_cpf_pessoa').value = pedido.cliente_pessoa_cpf_pessoa || 0;
-    document.getElementById('funcionario_pessoa_cpf_pessoa').value = pedido.funcionario_pessoa_cpf_pessoa || 0;
+    document.getElementById('id_pessoa').value = pedido.id_pessoa || 0;
+    document.getElementById('id_funcionario').value = pedido.id_funcionario || 0;
 
 
 
@@ -207,8 +207,8 @@ async function salvarOperacao() {
     const pedido = {
         id_pedido: searchId.value,
         data_pedido: formData.get('data_pedido'),
-        cliente_pessoa_cpf_pessoa: formData.get('cliente_pessoa_cpf_pessoa'),
-        funcionario_pessoa_cpf_pessoa: formData.get('funcionario_pessoa_cpf_pessoa'),
+        id_pessoa: formData.get('id_pessoa'),
+        id_funcionario: formData.get('id_funcionario'),
     };
 
     console.log(pedido)
@@ -290,7 +290,7 @@ function renderizerTabelaItensPedido(itens) {
         row.innerHTML = `
             <td>${item.pedido_id_pedido}</td>                  
             <td>${item.produto_id_produto}</td>
-            <td>${item.nome_produto}</td>
+            <td>${item.nome}</td>
             <td>
                 <input type="number" class="quantidade-input" data-index="${index}" 
                        value="${item.quantidade}" min="1">
@@ -393,8 +393,8 @@ function renderizarTabelaPedidos(pedidos) {
                         </button>
                     </td>
                     <td>${formatarData(pedido.data_pedido)}</td>                  
-                    <td>${pedido.cliente_pessoa_cpf_pessoa}</td>                  
-                    <td>${pedido.funcionario_pessoa_cpf_pessoa}</td>                  
+                    <td>${pedido.id_pessoa}</td>                  
+                    <td>${pedido.id_funcionario}</td>                  
                                  
                 `;
         pedidosTableBody.appendChild(row);
@@ -471,13 +471,13 @@ async function buscarProdutoPorId(button) {
         const precoInput = row.querySelector('.preco-input');
         precoInput.value = produto.preco_unitario;
 
-        const nome_produtoInput = row.querySelector('td:nth-child(3) span');
-        nome_produtoInput.innerHTML = produto.nome_produto;
+        const nomeInput = row.querySelector('td:nth-child(3) span');
+        nomeInput.innerHTML = produto.nome;
 
         // Atualiza o subtotal da linha
         atualizarSubtotal({ target: precoInput });
 
-        mostrarMensagem(`Produto ${produto.nome_produto} encontrado!`, 'success');
+        mostrarMensagem(`Produto ${produto.nome} encontrado!`, 'success');
 
     } catch (error) {
         console.error('Erro ao buscar produto:', error);
@@ -516,7 +516,7 @@ function btnAdicionarItem(button) {
     }
 
     // Envia os dados para a API usando fetch.
-    fetch(`${API_BASE_URL}/pedido_has_produto`, {
+    fetch(`${API_BASE_URL}/item_pedido`, {
         method: 'POST', // Método para criar um novo recurso.
         headers: {
             'Content-Type': 'application/json'
@@ -584,7 +584,7 @@ function btnAtualizarItem(button) {
     const itemData = {
         pedido_id_pedido: parseInt(pedidoId),
         produto_id_produto: parseInt(produtoId),
-        nome_produto: nomeProduto.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, " "), // Sanitiza e remove quebras de linha  
+        nome: nomeProduto.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, " "), // Sanitiza e remove quebras de linha  
         quantidade: parseInt(quantidade),
         preco_unitario: parseFloat(precoUnitario.replace(',', '.'))
     };
@@ -598,14 +598,14 @@ function btnAtualizarItem(button) {
     }
 
     // remover o nome do produto do envio, pois é desnecessário
-    delete itemData.nome_produto;
+    delete itemData.nome;
 
     //alert("Dados do item a serem salvos:" + JSON.stringify(itemData));
 
     // 6. Envia os dados para o backend usando fetch.
-    // Ajuste a URL e o método conforme sua API. router.put('/:id_pedido/:id_produto', pedido_has_produtoController.atualizarPedido_has_produto);
+    // Ajuste a URL e o método conforme sua API. router.put('/:id_pedido/:id_produto', item_pedidoController.atualizaritem_pedido);
     // Note que estamos enviando tanto o id do pedido quanto o id do produto na URL.
-    fetch(`${API_BASE_URL}/pedido_has_produto/${itemData.pedido_id_pedido}/${itemData.produto_id_produto}`, {
+    fetch(`${API_BASE_URL}/item_pedido/${itemData.pedido_id_pedido}/${itemData.produto_id_produto}`, {
         method: 'PUT', // para atualizar
         headers: {
             'Content-Type': 'application/json'
@@ -657,7 +657,7 @@ function btnExcluirItem(button) {
 
     // 5. Envia a requisição DELETE para a API.
     // A rota DELETE espera os IDs na URL para identificar o item.
-    fetch(`${API_BASE_URL}/pedido_has_produto/${pedidoId}/${produtoId}`, {
+    fetch(`${API_BASE_URL}/item_pedido/${pedidoId}/${produtoId}`, {
         method: 'DELETE', // O método HTTP para exclusão
     })
         .then(response => {
